@@ -1,0 +1,22 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 7px;
+    border-radius: 5px;
+    border: 2px solid skyblue;
+    font-size: 16px;
+}
+
+form button {
+    padding: 8px;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}

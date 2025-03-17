@@ -1,0 +1,65 @@
+#container {
+    height: 100vh;
+    background-image: url("../../../assets/background.jpg");
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#title {
+    width: 400px;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    background-color: white;
+}
+
+#form-container {
+    width: 400px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.signup-form.active {
+    display: block;
+}
+
+.login-form.active {
+    display: block;
+}
+
+
+/* toggling tabs styling */
+#tabs {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.tab {
+   padding: 5px 40px;
+   border-radius: 15px;
+   border: 1px solid lightgray;
+   font-size: 16px;
+    cursor: pointer;
+}
+
+.active-tab {
+    border: 2px solid skyblue;
+    background-color: skyblue;
+    
+}
+
+.tab-content {
+    display: none;
+}
+
+.active-tab-content {
+    display: block;
+}

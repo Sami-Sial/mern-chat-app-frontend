@@ -1,0 +1,30 @@
+#chats { 
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    height: calc(100vh - 7rem);
+    scrollbar-color: #202c33 #111b21;
+}
+
+.chat {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    opacity: 0.5;
+    cursor: pointer;
+    font-size: "14px";
+}
+
+.chat:hover {
+    opacity: 1;
+}
+
+ #search-result {
+    max-height: 250px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #232323 white;
+}
+
