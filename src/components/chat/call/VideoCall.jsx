@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import io from "socket.io-client";
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app";
 let socket;
 
 const VideoCall = () => {
@@ -48,9 +48,12 @@ const VideoCall = () => {
     const getToken = async () => {
       try {
         const { token } = JSON.parse(localStorage.getItem("userInfo"));
-        const { data } = await axios.get(`/api/generate-token/${user._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/generate-token/${user._id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         console.log(data);
         setZegoToken(data.token);
       } catch (error) {

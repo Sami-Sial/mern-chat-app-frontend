@@ -26,9 +26,12 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
     try {
       setLoading(true);
 
-      const { data } = await axios.get(`/api/user/all-users?search=${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/all-users?search=${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setSearchResult(data);
       setLoading(false);
@@ -43,7 +46,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
     if (!groupChatName) return;
     try {
       const { data } = axios.put(
-        "/api/chats/group/rename",
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/rename",
         { chatId: selectedChat._id, chatName: groupChatName },
         {
           headers: [
@@ -76,7 +79,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
       setLoading(true);
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.put(
-        `/api/chats/group/add_user`,
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/add_user`,
         {
           chatId: selectedChat._id,
           userId: user1._id,
@@ -109,7 +112,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
       setLoading(true);
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.put(
-        `/api/chats/group/remove_user`,
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/remove_user`,
         {
           chatId: selectedChat._id,
           userId: user1._id,

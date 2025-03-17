@@ -27,7 +27,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
 import io from "socket.io-client";
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app";
 let socket, selectedChatCompare;
 
 const Main = () => {
@@ -171,9 +171,12 @@ const Main = () => {
   const fetchMessages = async () => {
     try {
       if (!selectedChat) return;
-      const { data } = await axios.get(`/api/message/${selectedChat._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message/${selectedChat._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setMessages(data);
       console.log(data);
@@ -211,7 +214,7 @@ const Main = () => {
     try {
       let content = newMessage ? newMessage : null;
       const { data } = await axios.post(
-        "/api/message",
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message",
         { content, selcetedFile, chatId: selectedChat._id },
         {
           headers: {

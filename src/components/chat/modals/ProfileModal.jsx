@@ -17,9 +17,12 @@ const ProfileModal = ({ setProfileModalShow }) => {
   const logout = async () => {
     try {
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
-      const { data } = await axios.get("/api/user/logout", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/logout",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       localStorage.setItem("userInfo", "");
       toast.success("Logout successfull");
       navigate("/");

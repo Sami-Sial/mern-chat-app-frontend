@@ -27,9 +27,12 @@ const GroupChatModal = ({ modalShow }) => {
     try {
       setLoading(true);
 
-      const { data } = await axios.get(`/api/user/all-users?search=${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/all-users?search=${query}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setSearchResult(data);
       setLoading(false);
@@ -67,7 +70,7 @@ const GroupChatModal = ({ modalShow }) => {
       setLoading(true);
 
       const { data } = await axios.post(
-        "/api/chats/group",
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group",
         {
           name: groupChatName,
           users: JSON.stringify(selectedUsers.map((user) => user._id)),

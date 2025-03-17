@@ -5,7 +5,7 @@ import logo from "../../../assets/logo.png";
 import { Button } from "@mui/material";
 
 import io from "socket.io-client";
-const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app";
 let socket;
 
 const VoiceCall = () => {

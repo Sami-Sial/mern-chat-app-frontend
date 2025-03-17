@@ -19,7 +19,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
     try {
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.get(
-        `/api/user/all-users?search=${searchInput}`,
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/all-users?search=${searchInput}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -47,7 +47,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
 
       const { data } = await axios.post(
-        "/api/chats",
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats",
         { userId },
         {
           headers: {

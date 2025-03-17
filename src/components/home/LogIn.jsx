@@ -24,7 +24,7 @@ const LogIn = () => {
     try {
       setLoading(true);
       const { data } = await axios.post(
-        "/api/user/login",
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/login",
         { ...formData },
         { headers: { "Content-Type": "application/json" } }
       );

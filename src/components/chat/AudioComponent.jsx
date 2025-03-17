@@ -29,7 +29,7 @@ const Audio = ({ setShowVoiceComponent, setMessages, messages, socket }) => {
       try {
         const { token } = JSON.parse(localStorage.getItem("userInfo"));
         const { data } = await axios.post(
-          "/api/message",
+          "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message",
           { audio, chatId: selectedChat._id },
           {
             headers: {

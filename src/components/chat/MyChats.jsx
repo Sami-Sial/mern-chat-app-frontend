@@ -64,9 +64,12 @@ const MyChats = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const { data } = await axios.get("/api/chats", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         setChats(data);
       } catch (error) {
@@ -80,9 +83,12 @@ const MyChats = () => {
 
   const logout = async () => {
     try {
-      const { data } = await axios.get("/api/user/logout", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get(
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/logout",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       localStorage.setItem("userInfo", "");
       toast.success("Logout successfull");
       navigate("/");

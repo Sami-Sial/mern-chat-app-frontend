@@ -5,17 +5,28 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   server: {
     proxy: {
-      "/api/chats": "http://localhost:8080",
-      "/api/user/signup": "http://localhost:8080",
-      "/api/user/login": "http://localhost:8080",
-      "/api/user/all-users": "http://localhost:8080",
-      "/api/chats/group": "http://localhost:8080",
-      "/api/chats/group/add_user": "http://localhost:8080",
-      "/api/chats/group/rename": "http://localhost:8080",
-      "/api/chats/group/remove_user": "http://localhost:8080",
-      "/api/message": "http://localhost:8080",
-      "/api/generate-token/": "http://localhost:8080",
-      "/api/message/file/upload": "http://localhost:8080",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/signup":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/login":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/all-users":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/add_user":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/rename":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/remove_user":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/generate-token/":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
+      "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message/file/upload":
+        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app",
     },
   },
   plugins: [react()],
