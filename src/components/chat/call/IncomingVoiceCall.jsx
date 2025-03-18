@@ -13,7 +13,9 @@ const IncomingVoiceCall = () => {
     ChatState();
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(ENDPOINT, {
+      transports: ["websocket"], // Force WebSocket only
+    });
     socket.emit("setup", user);
     socket.on("connected", () => setSocketConnected(true));
   }, []);

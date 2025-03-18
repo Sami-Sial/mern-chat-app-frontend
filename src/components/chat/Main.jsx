@@ -79,7 +79,9 @@ const Main = () => {
   };
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(ENDPOINT, {
+      transports: ["websocket"], // Force WebSocket only
+    });
     if (window.navigator.onLine) {
       socket.emit("add_online_user", user._id);
     }
