@@ -14,7 +14,6 @@ import CollectionsIcon from "@mui/icons-material/Collections";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import KeyboardVoiceIcon from "@mui/icons-material/KeyboardVoice";
 import ScrollToBottom from "react-scroll-to-bottom";
-import CaptureAudio from "./CaptureAudio";
 import AudioComponent from "./AudioComponent";
 import EmojiPicker from "emoji-picker-react";
 import Popover from "@mui/material/Popover";
@@ -25,6 +24,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
+import TextField from "@mui/material/TextField";
+import { Box, Stack } from "@mui/material";
 
 import io from "socket.io-client";
 const ENDPOINT = "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app";
@@ -43,6 +46,7 @@ const Main = () => {
   const [showSenderProfileModal, setShowSenderProfileModal] = useState(false);
   const [showUpdateGroupModal, setShowUpdateGroupModal] = useState(false);
   const [selcetedFile, setSelectedFile] = useState(null);
+  const [onLineUsers, setOnLineUSers] = useState({});
   const {
     notification,
     setNotification,
@@ -82,6 +86,8 @@ const Main = () => {
     socket = io(ENDPOINT, {
       transports: ["websocket"], // Force WebSocket only
     });
+    console.log(navigator.onLine);
+
     if (window.navigator.onLine) {
       socket.emit("add_online_user", user._id);
     }
@@ -91,7 +97,32 @@ const Main = () => {
     socket.on("stop typing", () => setIsTyping(false));
   }, []);
 
+  const getSenderName = () => {
+    let sender = selectedChat.users.filter((u) => {
+      return u._id !== user._id;
+    });
+    return sender[0].name;
+  };
+
+  const getSenderImg = () => {
+    let sender = selectedChat.users.filter((u) => {
+      return u._id !== user._id;
+    });
+    return sender[0].pic;
+  };
+
+  const getSenderId = () => {
+    let sender = selectedChat.users.filter((u) => {
+      return u._id !== user._id;
+    });
+    return sender[0]._id;
+  };
+
   useEffect(() => {
+    window.addEventListener("beforeunload", () => {
+      socket.emit("remove_online_user", user._id);
+    });
+
     socket.on("message recieved", (newMessageRecieved) => {
       if (
         !selectedChatCompare || // if chat is not selected or doesn't match current chat
@@ -104,6 +135,16 @@ const Main = () => {
       } else {
         setMessages([...messages, newMessageRecieved]);
       }
+    });
+
+    socket.on("online_users", (onLineusers) => {
+      console.log(onLineusers);
+      setOnLineUSers(onLineusers);
+    });
+
+    socket.on("update_online_users", (onLineusers) => {
+      console.log(onLineusers);
+      setOnLineUSers(onLineusers);
     });
 
     socket.on("incoming_voice_call", ({ from, roomId, callType }) => {
@@ -132,20 +173,6 @@ const Main = () => {
       setIncomingVideoCall(undefined);
     });
   });
-
-  const getSenderName = () => {
-    let sender = selectedChat.users.filter((u) => {
-      return u._id !== user._id;
-    });
-    return sender[0].name;
-  };
-
-  const getSenderImg = () => {
-    let sender = selectedChat.users.filter((u) => {
-      return u._id !== user._id;
-    });
-    return sender[0].pic;
-  };
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
@@ -187,18 +214,6 @@ const Main = () => {
       let sender = selectedChat.users.filter((u) => {
         return u._id !== user._id;
       });
-
-      socket.on("online_users", (onLineusers) => {
-        console.log(onLineusers, sender[0]);
-        let reciver = onLineusers[sender[0]._id];
-        console.log(reciver);
-        console.log(socket);
-        if (reciver) {
-          setIsReciverOnline(true);
-        } else {
-          setIsReciverOnline(false);
-        }
-      });
     } catch (error) {
       toast.error(error.response.data);
     }
@@ -232,6 +247,7 @@ const Main = () => {
 
       setMessages([...messages, data]);
       setSelectedFile(null);
+      setShowFileModal(false);
       setNewMessage("");
     } catch (error) {
       toast.error(error.response.data);
@@ -267,7 +283,11 @@ const Main = () => {
     <>
       {selectedChat ? (
         <>
-          <div style={{ padding: "5px 1rem" }}>
+          <div
+            style={{
+              padding: "5px 1rem",
+            }}
+          >
             {selectedChat.isGroupChat ? (
               <div
                 style={{
@@ -279,6 +299,17 @@ const Main = () => {
                 <div
                   style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 >
+                  <KeyboardBackspaceIcon
+                    fontSize="large"
+                    sx={{
+                      color: "white",
+                      marginRight: "10px",
+                      cursor: "pointer",
+                      display: "none",
+                      "@media (max-width:700px)": { display: "inline" },
+                    }}
+                    onClick={() => setSelectedChat(null)}
+                  />
                   <img
                     onClick={() => setShowUpdateGroupModal(true)}
                     style={{
@@ -313,6 +344,18 @@ const Main = () => {
                 <div
                   style={{ display: "flex", gap: "10px", alignItems: "center" }}
                 >
+                  <KeyboardBackspaceIcon
+                    fontSize="large"
+                    sx={{
+                      color: "white",
+                      marginRight: "10px",
+                      cursor: "pointer",
+                      display: "none",
+                      "@media (max-width:700px)": { display: "inline" },
+                    }}
+                    onClick={() => setSelectedChat(null)}
+                  />
+
                   <img
                     onClick={() => setShowSenderProfileModal(true)}
                     style={{
@@ -327,7 +370,7 @@ const Main = () => {
                   <div>
                     <p>{getSenderName()}</p>
                     <p style={{ fontSize: "13px" }}>
-                      {isReciverOnline ? "online" : "offline"}
+                      {onLineUsers[getSenderId()] ? "online" : "offline"}
                     </p>
                   </div>
                   {isTyping ? (
@@ -381,6 +424,8 @@ const Main = () => {
                   messages={messages}
                   setMessages={setMessages}
                   socket={socket}
+                  setSelectedFile={setSelectedFile}
+                  selcetedFile={selcetedFile}
                 />
               </div>
             ) : (
@@ -390,7 +435,7 @@ const Main = () => {
                   backgroundColor: "#202c33",
                   display: "flex",
                   alignItems: "center",
-                  gap: "15px",
+                  gap: "5px",
                   color: "white",
                 }}
               >
@@ -415,20 +460,22 @@ const Main = () => {
                     </div>
                   </Popover>
                 </div>
-                <CollectionsIcon
+                <AttachFileIcon
                   onClick={openFilePicker}
                   style={{ cursor: "pointer" }}
                 />
                 <div>
-                  <input
-                    style={{
+                  <Box
+                    component="input"
+                    sx={{
                       width: "300px",
-                      padding: "7px 10px",
                       marginRight: "10px",
-                      border: "none",
-                      borderRadius: "15px",
-                      backgroundColor: "#111b21",
                       color: "white",
+                      padding: "7px 10px",
+                      border: "none",
+                      backgroundColor: "#111b21",
+                      borderRadius: "25px",
+                      "@media (max-width:520px)": { width: "65%" },
                     }}
                     type="text"
                     value={newMessage}
@@ -523,7 +570,7 @@ const Main = () => {
 
         <DialogContent dividers>
           <img
-            // src={window.URL.createObjectURL(selcetedFile)}
+            src={selcetedFile && window.URL.createObjectURL(selcetedFile)}
             style={{ borderRadius: "10px" }}
             width={350}
             height={250}

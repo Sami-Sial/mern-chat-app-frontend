@@ -45,41 +45,81 @@ const MyChats = () => {
     setUser,
     setSelectedChat,
     notification,
+    setNotification,
   } = ChatState();
   const { token } = JSON.parse(localStorage.getItem("userInfo"));
 
   let loggedUser = user;
-  const getSender = (users) => {
+  const getSenderName = (users) => {
     if (users) {
       return users[0]._id === loggedUser._id ? users[1].name : users[0].name;
-      // senderPic = users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
+    }
+  };
+
+  const getSenderPic = (users) => {
+    if (users) {
+      return users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
+    }
+  };
+
+  const getSenderId = (users) => {
+    if (users) {
+      return users[0]._id === loggedUser._id ? users[1]._id : users[0]._id;
+    }
+  };
+
+  const getNotif = (users) => {
+    const notif = notification?.filter(
+      (n) => n.sender._id == getSenderId(users)
+    );
+    if (notif?.length >= 1) {
+      return notif.length;
     }
   };
 
   console.log(notification);
-  notification.filter((notif) => {
-    console.log(notif.sender._id);
-  });
+
+  const searchExistingChat = (searchKeyword) => {
+    console.log(searchKeyword);
+
+    fetchChats(searchKeyword);
+  };
 
   useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const { data } = await axios.get(
-          "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        setChats(data);
-      } catch (error) {
-        toast.error(error.response?.data);
-        console.log(error);
-      }
-    };
-
     fetchChats();
   }, []);
+
+  function checkDateStatus(dateString) {
+    const givenDate = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1); // Get yesterday's date
+
+    if (givenDate.toDateString() === today.toDateString()) {
+      return dateString.slice(12, dateString.length);
+    } else if (givenDate.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    } else {
+      return dateString.slice(0, 11);
+    }
+  }
+
+  const fetchChats = async (searchKeyword) => {
+    try {
+      const { data } = await axios.get(
+        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats?${searchKeyword}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setChats(data);
+      console.log(data);
+    } catch (error) {
+      toast.error(error.response?.data);
+      console.log(error);
+    }
+  };
 
   const logout = async () => {
     try {
@@ -187,6 +227,7 @@ const MyChats = () => {
               width: "80%",
               color: "white",
             }}
+            onChange={(e) => searchExistingChat(e.target.value)}
             type="text"
             placeholder="Search or start new chat"
           />
@@ -210,11 +251,21 @@ const MyChats = () => {
               <div
                 className="chat"
                 key={chat._id}
-                onClick={() => setSelectedChat(chat)}
+                style={{
+                  backgroundColor: selectedChat?._id == chat?._id && "#202c33",
+                }}
+                onClick={() => {
+                  setSelectedChat(chat);
+                  setNotification((prevNotif) => {
+                    prevNotif?.filter((n) => n.chat?._id !== selectedChat?._id);
+                  });
+                }}
               >
                 <img
                   style={{ borderRadius: "50%", marginRight: "5px" }}
-                  src={logo}
+                  src={
+                    !chat.isGroupChat ? getSenderPic(chat.users) : chat.chatName
+                  }
                   width={40}
                   height={40}
                   alt=""
@@ -222,7 +273,6 @@ const MyChats = () => {
 
                 <div
                   style={{
-                    borderBottom: "2px solid #202c33",
                     flexGrow: "1",
                     padding: "5px",
                   }}
@@ -233,14 +283,52 @@ const MyChats = () => {
                       justifyContent: "space-between",
                     }}
                   >
-                    <p style={{ opacity: "1" }}>
+                    <p style={{ opacity: "1", color: "white" }}>
                       {!chat.isGroupChat
-                        ? getSender(chat.users)
+                        ? getSenderName(chat.users)
                         : chat.chatName}
                     </p>
-                    <p style={{ fontSize: "12px" }}>time</p>
+                    <p>{getNotif(chat.users)}</p>
+                    {/* {chat?.latestMsg && (
+                      <p
+                        style={{
+                          fontSize: "10px",
+                          color: "gray",
+                          opacity: "0.7",
+                        }}
+                      >
+                        {checkDateStatus(
+                          new Date(chat.latestMsg?.createdAt).toLocaleString(
+                            undefined,
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "numeric",
+                              hour12: true,
+                            }
+                          )
+                        )}
+                      </p>
+                    )} */}
                   </div>
-                  <p style={{ fontSize: "12px" }}>latest msg</p>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    {/* {chat.latestMsg?.msgType === "text" ? (
+                      <p style={{ fontSize: "12px", opacity: "0.7" }}>
+                        {chat.latestMsg?.content}
+                      </p>
+                    ) : (
+                      chat.latestMsg?.msgType
+                    )} */}
+
+                    {/* <p>{getNotif(chat.users)}</p> */}
+                  </div>
                 </div>
               </div>
             ))}

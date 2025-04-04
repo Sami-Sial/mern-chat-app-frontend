@@ -5,8 +5,16 @@ import SendIcon from "@mui/icons-material/Send";
 import { ChatState } from "../../context/ChatProvider";
 import { toast } from "react-toastify";
 import axios from "axios";
+import Box from "@mui/material/Stack";
 
-const Audio = ({ setShowVoiceComponent, setMessages, messages, socket }) => {
+const Audio = ({
+  setShowVoiceComponent,
+  setMessages,
+  messages,
+  socket,
+  setSelectedFile,
+  selcetedFile,
+}) => {
   const { selectedChat } = ChatState();
   const { status, startRecording, stopRecording, mediaBlobUrl } =
     useReactMediaRecorder({
@@ -20,17 +28,18 @@ const Audio = ({ setShowVoiceComponent, setMessages, messages, socket }) => {
 
   const sendVoice = async () => {
     let blobFile = await fetch(mediaBlobUrl).then((r) => r.blob());
-    const audio = new File([blobFile], "audio", { type: blobFile.type });
+    const audio = new File([blobFile], "selectedFile", { type: blobFile.type });
 
     console.log(audio);
     console.log(selectedChat._id);
+    setSelectedFile(audio);
 
     if (mediaBlobUrl) {
       try {
         const { token } = JSON.parse(localStorage.getItem("userInfo"));
         const { data } = await axios.post(
           "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message",
-          { audio, chatId: selectedChat._id },
+          { selcetedFile, chatId: selectedChat._id },
           {
             headers: {
               "Content-Type": "multipart/form-data",
@@ -56,8 +65,10 @@ const Audio = ({ setShowVoiceComponent, setMessages, messages, socket }) => {
       style={{
         display: "flex",
         padding: "5px",
-        justifyContent: "flex-end",
         gap: "10px",
+        overflowX: "auto",
+        scrollbarWidth: "thin",
+        scrollbarColor: "black",
       }}
     >
       <Button

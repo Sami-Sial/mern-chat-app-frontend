@@ -43,6 +43,8 @@ const SideDrawer = ({ setOpenDrwer }) => {
 
   const accessChat = async (userId) => {
     try {
+      setOpenDrwer(false);
+
       setLoading(true);
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -57,12 +59,11 @@ const SideDrawer = ({ setOpenDrwer }) => {
         }
       );
 
-      setOpenDrwer(false);
       setLoading(false);
       setSearchInput("");
       setUsers([]);
 
-      if (chats && !chats.find((c) => c._id === data.id)) {
+      if (chats && !chats.find((c) => c._id == data._id)) {
         return setChats([data, ...chats]);
       }
 
@@ -80,7 +81,6 @@ const SideDrawer = ({ setOpenDrwer }) => {
   return (
     <div
       style={{
-        width: "25vw",
         height: "100vh",
         backgroundColor: "#111b21",
         overflow: "hidden",
@@ -102,7 +102,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
         <span
           style={{
             position: "absolute",
-            left: "23vw",
+            left: "230px",
             top: "5px",
             cursor: "pointer",
           }}
@@ -183,7 +183,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
                   }}
                 >
                   <p>{user.name}</p>
-                  <p>Email: {user.email}</p>
+                  <p style={{ fontSize: "12px" }}>Email: {user.email}</p>
                 </div>
               </div>
             ))}

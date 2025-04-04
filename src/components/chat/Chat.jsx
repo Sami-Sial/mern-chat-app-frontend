@@ -7,10 +7,19 @@ import VoiceCall from "./call/VoiceCall";
 import VideoCall from "./call/VideoCall";
 import IncomingVoiceCall from "./call/IncomingVoiceCall.jsx";
 import IncomingVideoCall from "./call/IncomingVideoCall.jsx";
+import Stack from "@mui/material/Stack";
 
 const Chat = () => {
-  const { user, voiceCall, videoCall, incomingVoiceCall, incomingVideoCall } =
-    ChatState();
+  const {
+    user,
+    selectedChat,
+    voiceCall,
+    videoCall,
+    incomingVoiceCall,
+    incomingVideoCall,
+  } = ChatState();
+
+  console.log(selectedChat);
 
   return (
     <>
@@ -41,27 +50,35 @@ const Chat = () => {
       )}
 
       {user && (
-        <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
-          <div
-            style={{
+        <div style={{ display: "flex", width: "100vw" }}>
+          <Stack
+            sx={{
               width: "25%",
               height: "100vh",
               borderRight: "2px solid #111b21",
               backgroundColor: "#111b21",
+              "@media (max-width:900px)": { width: "28%" },
+              "@media (max-width:700px)": selectedChat
+                ? { display: "none" }
+                : { display: "block", width: "100vw" },
             }}
           >
             <MyChats />
-          </div>
+          </Stack>
 
-          <div
-            style={{
+          <Stack
+            sx={{
               width: "75%",
               height: "100vh",
               backgroundColor: "#202c33",
+              "@media (max-width:900px)": { width: "73%" },
+              "@media (max-width:700px)": selectedChat
+                ? { display: "block", width: "100vw" }
+                : { display: "none" },
             }}
           >
             <Main />
-          </div>
+          </Stack>
         </div>
       )}
     </>

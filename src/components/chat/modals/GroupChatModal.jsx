@@ -12,6 +12,7 @@ import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Dialog from "@mui/material/Dialog";
+import Stack from "@mui/material/Stack";
 
 const GroupChatModal = ({ modalShow }) => {
   const [groupChatName, setGroupChatName] = useState("");
@@ -96,7 +97,9 @@ const GroupChatModal = ({ modalShow }) => {
   };
 
   return (
-    <div style={{ width: "400px" }}>
+    <Stack
+      sx={{ width: "400px", "@media (max-width:570px)": { width: "85vw" } }}
+    >
       <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
         Create Group Chat
       </DialogTitle>
@@ -212,7 +215,7 @@ const GroupChatModal = ({ modalShow }) => {
           Close
         </Button>
       </DialogActions>
-    </div>
+    </Stack>
   );
 };
 
