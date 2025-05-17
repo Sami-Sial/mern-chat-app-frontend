@@ -16,12 +16,14 @@ import Popover from "@mui/material/Popover";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 import ProfileModal from "./modals/ProfileModal";
+import ChatLoading from "./ChatLoading";
 
 const MyChats = () => {
   const navigate = useNavigate();
   const [modalShow, setModalShow] = useState(false);
   const [profileModalShow, setProfileModalShow] = useState(false);
   const [openDrawer, setOpenDrwer] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const handleClick = (event) => {
@@ -105,6 +107,7 @@ const MyChats = () => {
   }
 
   const fetchChats = async (searchKeyword) => {
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats?${searchKeyword}`,
@@ -118,6 +121,8 @@ const MyChats = () => {
     } catch (error) {
       toast.error(error.response?.data);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -150,6 +155,7 @@ const MyChats = () => {
           }}
         >
           <img
+            title="view profile"
             onClick={() => setProfileModalShow(true)}
             src={user?.pic}
             height={40}
@@ -163,10 +169,16 @@ const MyChats = () => {
           />
 
           <span>
-            <ChatIcon
-              onClick={toggleDrawer(true)}
-              style={{ marginRight: "10px", cursor: "pointer", color: "white" }}
-            />
+            <span title="create chat">
+              <ChatIcon
+                onClick={toggleDrawer(true)}
+                style={{
+                  marginRight: "10px",
+                  cursor: "pointer",
+                  color: "white",
+                }}
+              />
+            </span>
             <MoreVertIcon
               aria-describedby={id}
               onClick={handleClick}
@@ -245,51 +257,59 @@ const MyChats = () => {
           </Button>
         </div>
 
-        <div id="chats" style={{ overflowY: "auto" }}>
-          {chats.length >= 1 &&
-            chats.map((chat) => (
-              <div
-                className="chat"
-                key={chat._id}
-                style={{
-                  backgroundColor: selectedChat?._id == chat?._id && "#202c33",
-                }}
-                onClick={() => {
-                  setSelectedChat(chat);
-                  setNotification((prevNotif) => {
-                    prevNotif?.filter((n) => n.chat?._id !== selectedChat?._id);
-                  });
-                }}
-              >
-                <img
-                  style={{ borderRadius: "50%", marginRight: "5px" }}
-                  src={
-                    !chat.isGroupChat ? getSenderPic(chat.users) : chat.chatName
-                  }
-                  width={40}
-                  height={40}
-                  alt=""
-                />
-
+        {loading ? (
+          <ChatLoading />
+        ) : (
+          <div id="chats" style={{ overflowY: "auto" }}>
+            {chats.length >= 1 ? (
+              chats.map((chat) => (
                 <div
+                  className="chat"
+                  key={chat._id}
                   style={{
-                    flexGrow: "1",
-                    padding: "5px",
+                    backgroundColor:
+                      selectedChat?._id == chat?._id && "#202c33",
+                  }}
+                  onClick={() => {
+                    setSelectedChat(chat);
+                    setNotification((prevNotif) => {
+                      prevNotif?.filter(
+                        (n) => n.chat?._id !== selectedChat?._id
+                      );
+                    });
                   }}
                 >
+                  <img
+                    style={{ borderRadius: "50%", marginRight: "5px" }}
+                    src={
+                      !chat.isGroupChat
+                        ? getSenderPic(chat.users)
+                        : chat.chatName
+                    }
+                    width={40}
+                    height={40}
+                    alt=""
+                  />
+
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
+                      flexGrow: "1",
+                      padding: "5px",
                     }}
                   >
-                    <p style={{ opacity: "1", color: "white" }}>
-                      {!chat.isGroupChat
-                        ? getSenderName(chat.users)
-                        : chat.chatName}
-                    </p>
-                    <p>{getNotif(chat.users)}</p>
-                    {/* {chat?.latestMsg && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <p style={{ opacity: "1", color: "white" }}>
+                        {!chat.isGroupChat
+                          ? getSenderName(chat.users)
+                          : chat.chatName}
+                      </p>
+                      <p>{getNotif(chat.users)}</p>
+                      {/* {chat?.latestMsg && (
                       <p
                         style={{
                           fontSize: "10px",
@@ -312,14 +332,14 @@ const MyChats = () => {
                         )}
                       </p>
                     )} */}
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    {/* {chat.latestMsg?.msgType === "text" ? (
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      {/* {chat.latestMsg?.msgType === "text" ? (
                       <p style={{ fontSize: "12px", opacity: "0.7" }}>
                         {chat.latestMsg?.content}
                       </p>
@@ -327,12 +347,16 @@ const MyChats = () => {
                       chat.latestMsg?.msgType
                     )} */}
 
-                    {/* <p>{getNotif(chat.users)}</p> */}
+                      {/* <p>{getNotif(chat.users)}</p> */}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-        </div>
+              ))
+            ) : (
+              <p style={{ padding: "2rem 10px" }}>No chats yet</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* group chat modal */}

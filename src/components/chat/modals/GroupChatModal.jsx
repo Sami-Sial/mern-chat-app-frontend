@@ -67,9 +67,9 @@ const GroupChatModal = ({ modalShow }) => {
       return;
     }
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
+    try {
       const { data } = await axios.post(
         "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group",
         {
@@ -77,22 +77,23 @@ const GroupChatModal = ({ modalShow }) => {
           users: JSON.stringify(selectedUsers.map((user) => user._id)),
         },
         {
-          headers: [
-            { "Content-Type": "application/json" },
-            { Authorization: `Bearer ${token}` },
-          ],
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       setChats(data, ...chats);
 
       console.log(data);
-      setLoading(false);
       setGroupModalShow(false);
       toast.success("New Group created");
     } catch (error) {
       toast.error(error.response?.data);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -178,6 +179,7 @@ const GroupChatModal = ({ modalShow }) => {
                 onClick={() => addUserToGroup(result)}
                 id="user-list"
                 key={result._id}
+                style={{ color: "black" }}
               >
                 <span>
                   <img
@@ -192,19 +194,24 @@ const GroupChatModal = ({ modalShow }) => {
                   />
                 </span>
                 <div>
-                  <p>{result.name}</p>
-                  <p>Email: {result.email}</p>
+                  <p style={{ color: "black" }}>{result.name}</p>
+                  <p style={{ color: "black" }}>Email: {result.email}</p>
                 </div>
               </div>
             ))}
         </div>
 
-        <Button size="small" variant="contained" onClick={createGroup}>
-          Create Group
+        <Button
+          disabled={loading ? true : false}
+          size="small"
+          variant="contained"
+          onClick={createGroup}
+        >
+          {loading ? "Creating Group..." : "Create Group"}
         </Button>
       </DialogContent>
 
-      <DialogActions>
+      {/* <DialogActions>
         <Button
           variant="contained"
           color="secondary"
@@ -214,7 +221,7 @@ const GroupChatModal = ({ modalShow }) => {
         >
           Close
         </Button>
-      </DialogActions>
+      </DialogActions> */}
     </Stack>
   );
 };

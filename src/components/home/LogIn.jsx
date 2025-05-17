@@ -3,6 +3,7 @@ import "./stylesheets/signup-login.css";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 const LogIn = () => {
   const navigate = useNavigate();
@@ -20,9 +21,9 @@ const LogIn = () => {
     }
 
     const formData = { email, password };
+    setLoading(true);
 
     try {
-      setLoading(true);
       const { data } = await axios.post(
         "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/login",
         { ...formData },
@@ -38,46 +39,52 @@ const LogIn = () => {
     } catch (error) {
       console.log(error.response?.data, error.message);
       toast.error(error.response.data);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <>
-      <form action="">
-        <div className="input-group">
-          <label htmlFor="loginEmail">
-            Email <b style={{ color: "red" }}>*</b>
-          </label>
-          <br />
-          <input
-            type="email"
-            id="loginEmail"
-            placeholder="Enter your Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
+      {loading ? (
+        <Loader />
+      ) : (
+        <form action="">
+          <div className="input-group">
+            <label htmlFor="loginEmail">
+              Email <b style={{ color: "red" }}>*</b>
+            </label>
+            <br />
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="Enter your Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <div className="input-group">
-          <label htmlFor="loginPassword">
-            Password <b style={{ color: "red" }}>*</b>
-          </label>
-          <br />
-          <input
-            type={showPassword ? "text" : "password"}
-            id="loginPassword"
-            placeholder="Enter your Passowrd"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
+          <div className="input-group">
+            <label htmlFor="loginPassword">
+              Password <b style={{ color: "red" }}>*</b>
+            </label>
+            <br />
+            <input
+              type={showPassword ? "text" : "password"}
+              id="loginPassword"
+              placeholder="Enter your Passowrd"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-        <button onClick={loginSubmit}>Login</button>
-      </form>
+          <button disabled={loading ? true : false} onClick={loginSubmit}>
+            Login
+          </button>
+        </form>
+      )}
     </>
   );
 };

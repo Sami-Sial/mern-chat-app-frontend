@@ -16,6 +16,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
   const { setSelectedChat, chats, setChats } = ChatState();
 
   const fetchUsers = async () => {
+    setChatLoading(true);
     try {
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.get(
@@ -27,6 +28,8 @@ const SideDrawer = ({ setOpenDrwer }) => {
     } catch (error) {
       toast.error(error.response?.data);
       console.log(error);
+    } finally {
+      setChatLoading(false);
     }
   };
 
@@ -42,10 +45,11 @@ const SideDrawer = ({ setOpenDrwer }) => {
   };
 
   const accessChat = async (userId) => {
+    setLoading(true);
+
     try {
       setOpenDrwer(false);
 
-      setLoading(true);
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
 
       const { data } = await axios.post(
@@ -71,6 +75,8 @@ const SideDrawer = ({ setOpenDrwer }) => {
     } catch (error) {
       toast.error(error.response?.data);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,7 +138,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
           <input
             style={{
               backgroundColor: "#202c33",
-              padding: "6px 10px",
+              padding: "2px 10px",
               borderRadius: "15px",
               border: "none",
               width: "80%",
@@ -147,6 +153,7 @@ const SideDrawer = ({ setOpenDrwer }) => {
             variant="contained"
             color="dark"
             size="small"
+            disabled={loading || chatLoading ? true : false}
             onClick={searchHandler}
           >
             Search
@@ -160,33 +167,42 @@ const SideDrawer = ({ setOpenDrwer }) => {
             <h4 style={{ textAlign: "center", marginBottom: "10px" }}>
               Users of Tak-A-tive
             </h4>
-            {users?.map((user) => (
-              <div style={{ display: "flex", padding: "10px" }} key={user._id}>
-                <span>
-                  <img
-                    style={{
-                      border: "2px solid #367134",
-                      borderRadius: "50%",
-                      marginRight: "10px",
-                    }}
-                    src={user.pic}
-                    height={40}
-                    width={40}
-                  />
-                </span>
-                <div
-                  onClick={() => accessChat(user._id)}
-                  style={{
-                    flexGrow: "1",
-                    borderBottom: "2px solid #202c33",
-                    cursor: "pointer",
-                  }}
-                >
-                  <p>{user.name}</p>
-                  <p style={{ fontSize: "12px" }}>Email: {user.email}</p>
-                </div>
-              </div>
-            ))}
+            {chatLoading ? (
+              <ChatLoading />
+            ) : (
+              <>
+                {users?.map((user) => (
+                  <div
+                    style={{ display: "flex", padding: "10px" }}
+                    key={user._id}
+                  >
+                    <span>
+                      <img
+                        style={{
+                          border: "2px solid #367134",
+                          borderRadius: "50%",
+                          marginRight: "10px",
+                        }}
+                        src={user.pic}
+                        height={40}
+                        width={40}
+                      />
+                    </span>
+                    <div
+                      onClick={() => accessChat(user._id)}
+                      style={{
+                        flexGrow: "1",
+                        borderBottom: "2px solid #202c33",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <p>{user.name}</p>
+                      <p style={{ fontSize: "12px" }}>Email: {user.email}</p>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         )}
       </div>
