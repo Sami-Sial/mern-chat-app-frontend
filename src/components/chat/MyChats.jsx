@@ -44,7 +44,6 @@ const MyChats = () => {
   const [filteredChats, setFilteredChats] = useState([]);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
-
   const {
     chats,
     setChats,
@@ -145,10 +144,9 @@ const MyChats = () => {
       localStorage.removeItem("userInfo");
       setUser(null);
       toast.success("Logout seucessfully");
-      navigate("/")
+      navigate("/");
     }, 2000);
   };
-
 
   const handleCreateNewChat = () => {
     setOpenDrwer(true);
@@ -245,18 +243,18 @@ const MyChats = () => {
               onClick={() => setProfileModalShow(true)}
               src={user?.pic}
               title="View Profile"
-              height={36}                // slightly smaller
+              height={36} // slightly smaller
               width={36}
               alt={user?.name || "Profile"}
               style={{
-                borderRadius: "50%",     // rounded
+                borderRadius: "50%", // rounded
                 cursor: "pointer",
                 border: "2px solid #202c33",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
+                boxShadow:
+                  "0 6px 18px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
                 transition: "transform .15s ease, box-shadow .15s ease",
                 objectFit: "cover",
               }}
-
             />
             <p>{user?.name}</p>
           </div>
@@ -335,10 +333,15 @@ const MyChats = () => {
                   disabled={logoutLoading}
                 >
                   {logoutLoading ? (
-                    <><CircularProgress size={20} /> <p style={{ color: "black" }}>Logging out..</p></>
+                    <>
+                      <CircularProgress size={20} />{" "}
+                      <p style={{ color: "black" }}>Logging out..</p>
+                    </>
                   ) : (
-                    <><LogoutIcon fontSize="small" />
-                      <span>Logout</span></>
+                    <>
+                      <LogoutIcon fontSize="small" />
+                      <span>Logout</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -346,7 +349,7 @@ const MyChats = () => {
           </span>
         </div>
 
-        {/* Search Input */}
+        {/* Search Inpu */}
         <div
           style={{
             display: "flex",
@@ -391,12 +394,13 @@ const MyChats = () => {
                   backgroundColor:
                     selectedChat?._id === chat?._id ? "#2a3942" : "",
                   border:
-                    selectedChat?._id === chat?._id ? "" : "0.5px solid #2a3942",
+                    selectedChat?._id === chat?._id
+                      ? ""
+                      : "0.5px solid #2a3942",
                   transition: "background 0.2s ease",
                 }}
                 className="chats"
               >
-
                 <img
                   src={
                     !chat.isGroupChat ? getSenderPic(chat.users) : chat.groupPic
