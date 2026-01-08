@@ -126,13 +126,15 @@ const Main = () => {
   };
 
   useEffect(() => {
-    window.addEventListener("beforeunload", () => {
+    const handleBeforeUnload = () => {
       socket.emit("remove_online_user", user._id);
-    });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     socket.on("message recieved", (newMessageRecieved) => {
       if (
-        !selectedChatCompare || // if chat is not selected or doesn't match current chat
+        !selectedChatCompare ||
         selectedChatCompare._id !== newMessageRecieved.chat._id
       ) {
         if (!notification.includes(newMessageRecieved)) {
@@ -140,7 +142,7 @@ const Main = () => {
           fetchMessages();
         }
       } else {
-        setMessages([...messages, newMessageRecieved]);
+        setMessages((prev) => [...prev, newMessageRecieved]);
       }
     });
 
@@ -154,7 +156,7 @@ const Main = () => {
       setOnLineUSers(onLineusers);
     });
 
-    socket.on("incoming_voice_call", ({ from, roomId, callType, type }) => {
+    socket.on("incoming_voice_call", ({ from, roomId, callType }) => {
       setIncomingVoiceCall({
         ...from,
         roomId,
@@ -179,7 +181,20 @@ const Main = () => {
       setVideoCall(undefined);
       setIncomingVideoCall(undefined);
     });
-  });
+
+    return () => {
+      // cleanup listeners when component unmounts
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      socket.off("message recieved");
+      socket.off("online_users");
+      socket.off("update_online_users");
+      socket.off("incoming_voice_call");
+      socket.off("incoming_video_call");
+      socket.off("voice_call_rejected");
+      socket.off("video_call_rejected");
+    };
+  }, []); // <-- empty dependency array ensures it runs only once
+
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);

@@ -23,7 +23,6 @@ import ChatLoading from "./ChatLoading"; // Skeleton component
 import LogoutIcon from "@mui/icons-material/Logout";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-
 import { CircularProgress } from "@mui/material";
 
 const BACKEND_BASE_URL =
@@ -37,7 +36,6 @@ const MyChats = () => {
   const [profileModalShow, setProfileModalShow] = useState(false);
   const [openDrawer, setOpenDrwer] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-
   const [loading, setLoading] = useState(true); // Loading for first fetch
   const [searchLoading, setSearchLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -95,10 +93,13 @@ const MyChats = () => {
 
   const getSenderName = (users) =>
     users[0]._id === loggedUser._id ? users[1].name : users[0].name;
+
   const getSenderPic = (users) =>
     users[0]._id === loggedUser._id ? users[1].pic : users[0].pic;
+
   const getSenderId = (users) =>
     users[0]._id === loggedUser._id ? users[1]._id : users[0]._id;
+
   const getNotif = (users) => {
     const notif = notification?.filter(
       (n) => n.sender._id === getSenderId(users)
@@ -128,7 +129,6 @@ const MyChats = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(data);
-
       setChats(data);
     } catch (error) {
       toast.error(error.response?.data || "Failed to load chats");
@@ -139,7 +139,6 @@ const MyChats = () => {
 
   const handleLogout = () => {
     setLogoutLoading(true);
-
     setTimeout(() => {
       localStorage.removeItem("userInfo");
       setUser(null);
@@ -188,9 +187,7 @@ const MyChats = () => {
       case "Video":
         return (
           <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <VideoFileIcon
-              sx={{ fontSize: 16, color: "white", opacity: 0.6 }}
-            />{" "}
+            <VideoFileIcon sx={{ fontSize: 16, color: "white", opacity: 0.6 }} />{" "}
             <span>Video</span>
           </span>
         );
@@ -243,11 +240,11 @@ const MyChats = () => {
               onClick={() => setProfileModalShow(true)}
               src={user?.pic}
               title="View Profile"
-              height={36} // slightly smaller
+              height={36}
               width={36}
               alt={user?.name || "Profile"}
               style={{
-                borderRadius: "50%", // rounded
+                borderRadius: "50%",
                 cursor: "pointer",
                 border: "2px solid #202c33",
                 boxShadow:
@@ -258,7 +255,6 @@ const MyChats = () => {
             />
             <p>{user?.name}</p>
           </div>
-
           <span>
             <MoreVertIcon
               aria-describedby={popId}
@@ -334,8 +330,7 @@ const MyChats = () => {
                 >
                   {logoutLoading ? (
                     <>
-                      <CircularProgress size={20} />{" "}
-                      <p style={{ color: "black" }}>Logging out..</p>
+                      <CircularProgress size={20} /> <p style={{ color: "black" }}>Logging out..</p>
                     </>
                   ) : (
                     <>
@@ -349,7 +344,7 @@ const MyChats = () => {
           </span>
         </div>
 
-        {/* Search Inpu */}
+        {/* Search Input */}
         <div
           style={{
             display: "flex",
@@ -394,16 +389,17 @@ const MyChats = () => {
                   backgroundColor:
                     selectedChat?._id === chat?._id ? "#2a3942" : "",
                   border:
-                    selectedChat?._id === chat?._id
-                      ? ""
-                      : "0.5px solid #2a3942",
+                    selectedChat?._id === chat?._id ? "" : "0.5px solid #2a3942",
                   transition: "background 0.2s ease",
                 }}
                 className="chats"
+                key={chat._id}
               >
                 <img
                   src={
-                    !chat.isGroupChat ? getSenderPic(chat.users) : chat.groupPic
+                    !chat.isGroupChat
+                      ? getSenderPic(chat.users)
+                      : chat.groupPic
                   }
                   style={{
                     borderRadius: "50%",
@@ -420,15 +416,14 @@ const MyChats = () => {
                   alt=""
                 />
                 <div style={{ flexGrow: "1", padding: "5px" }}>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <p style={{ color: "white" }}>
                       {!chat.isGroupChat
                         ? getSenderName(chat.users)
                         : chat.chatName}
                     </p>
-                    {chat.latestMsg && (
+                    {/* Latest message time - COMMENTED OUT */}
+                    {/* {chat.latestMsg && (
                       <p style={{ fontSize: "10px", color: "white" }}>
                         {checkDateStatus(
                           new Date(chat.latestMsg.createdAt).toLocaleString(
@@ -444,7 +439,7 @@ const MyChats = () => {
                           )
                         )}
                       </p>
-                    )}
+                    )} */}
                   </div>
                   <div
                     style={{
@@ -464,9 +459,10 @@ const MyChats = () => {
                         maxWidth: "150px",
                       }}
                     >
-                      {getLatestMessagePreview(chat.latestMsg)}
+                      {/* {getLatestMessagePreview(chat.latestMsg)} */}
                     </div>
-                    {getNotif(chat.users) > 0 && (
+                    {/* Notification badge - COMMENTED OUT */}
+                    {/* {getNotif(chat.users) > 0 && (
                       <div
                         style={{
                           minWidth: "20px",
@@ -482,19 +478,13 @@ const MyChats = () => {
                       >
                         {getNotif(chat.users)}
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "white",
-              }}
-            >
+            <div style={{ textAlign: "center", padding: "20px", color: "white" }}>
               <p>No chats found</p>
               <Button
                 variant="contained"
