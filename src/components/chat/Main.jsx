@@ -183,7 +183,7 @@ const Main = () => {
     });
 
     return () => {
-      // cleanup listeners when component unmounts
+      // cleanup listeners when component unmoun
       window.removeEventListener("beforeunload", handleBeforeUnload);
       socket.off("message recieved");
       socket.off("online_users");
@@ -193,13 +193,12 @@ const Main = () => {
       socket.off("voice_call_rejected");
       socket.off("video_call_rejected");
     };
-  }, []); // <-- empty dependency array ensures it runs only once
+  });
 
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
 
-    // typing indicator logic
     if (!socketConnected) return;
 
     if (!typing) {
