@@ -702,23 +702,23 @@ const Main = () => {
               {/*  ZIP */}
               {(selcetedFile.type === "application/zip" ||
                 selcetedFile.type === "application/x-zip-compressed") && (
-                <div
-                  style={{
-                    padding: "30px",
-                    textAlign: "center",
-                    borderRadius: "14px",
-                    backgroundColor: "#fff",
-                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
-                    width: "100%",
-                    maxWidth: "600px",
-                  }}
-                >
-                  <strong>{selcetedFile.name}</strong>
-                  <p style={{ marginTop: "10px", color: "#555" }}>
-                    ZIP file selected — preview not available.
-                  </p>
-                </div>
-              )}
+                  <div
+                    style={{
+                      padding: "30px",
+                      textAlign: "center",
+                      borderRadius: "14px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                      width: "100%",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    <strong>{selcetedFile.name}</strong>
+                    <p style={{ marginTop: "10px", color: "#555" }}>
+                      ZIP file selected — preview not available.
+                    </p>
+                  </div>
+                )}
 
               {/*  TXT */}
               {selcetedFile.type === "text/plain" && (
@@ -747,23 +747,23 @@ const Main = () => {
                 selcetedFile.type === "application/x-zip-compressed" ||
                 selcetedFile.type === "text/plain"
               ) && (
-                <div
-                  style={{
-                    padding: "30px",
-                    textAlign: "center",
-                    borderRadius: "14px",
-                    backgroundColor: "#fff",
-                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
-                    width: "100%",
-                    maxWidth: "600px",
-                  }}
-                >
-                  <strong>{selcetedFile.name}</strong>
-                  <p style={{ marginTop: "10px", color: "#555" }}>
-                    No preview available for this file type.
-                  </p>
-                </div>
-              )}
+                  <div
+                    style={{
+                      padding: "30px",
+                      textAlign: "center",
+                      borderRadius: "14px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                      width: "100%",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    <strong>{selcetedFile.name}</strong>
+                    <p style={{ marginTop: "10px", color: "#555" }}>
+                      No preview available for this file type.
+                    </p>
+                  </div>
+                )}
             </>
           )}
         </DialogContent>

@@ -24,17 +24,15 @@ const Audio = ({
   const { selectedChat } = ChatState();
   const [isSendingVoice, setIsSendingVoice] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [stopped, setStopped] = useState(false); // track if recording stopped
+  const [stopped, setStopped] = useState(false);
 
   const { status, startRecording, stopRecording, mediaBlobUrl } =
     useReactMediaRecorder({ audio: true });
 
-  // Auto start recording on first render
   useEffect(() => {
     startRecording();
   }, []);
 
-  // Timer for recording
   useEffect(() => {
     let timer;
     if (status === "recording") {
@@ -54,7 +52,8 @@ const Audio = ({
   const sendVoice = async () => {
     setIsSendingVoice(true);
     let blobFile = await fetch(mediaBlobUrl).then((r) => r.blob());
-    const audio = new File([blobFile], "selectedFile", { type: blobFile.type });
+    const audio = new File([blobFile], "selcetedFile", { type: blobFile.type });
+    console.log(audio);
 
     setSelectedFile(audio);
     if (mediaBlobUrl) {
@@ -128,7 +127,6 @@ const Audio = ({
         Stop
       </Button>
 
-      {/* Show recording indicator only while recording */}
       {status === "recording" && (
         <div
           style={{
@@ -153,9 +151,12 @@ const Audio = ({
         </div>
       )}
 
-      {/* Show audio only after recording stopped */}
       {stopped && mediaBlobUrl && (
-        <audio style={{ height: "30px", marginLeft: "10px" }} src={mediaBlobUrl} controls />
+        <audio
+          style={{ height: "30px", marginLeft: "10px" }}
+          src={mediaBlobUrl}
+          controls
+        />
       )}
 
       <DeleteIcon
@@ -170,12 +171,16 @@ const Audio = ({
         <CircularProgress size={20} color="secondary" />
       ) : (
         <SendIcon
-          onClick={sendVoice}
+          onClick={() => {
+            if (status === "recording") {
+              stopRecording();
+            }
+            sendVoice();
+          }}
           style={{ color: "white", cursor: "pointer" }}
         />
       )}
 
-      {/* Pulse animation */}
       <style>
         {`
           @keyframes pulse {
