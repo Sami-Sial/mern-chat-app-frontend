@@ -12,6 +12,11 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 
+const BACKEND_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_BACKEND_BASE_URL
+    : import.meta.env.VITE_PROD_BACKEND_BASE_URL;
+
 const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
   const [groupChatName, setGroupChatName] = useState("");
   const [groupUsers, setGroupUsers] = useState([]);
@@ -22,12 +27,15 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
   const { user, selectedChat, setSelectedChat } = ChatState();
   const { token } = JSON.parse(localStorage.getItem("userInfo"));
 
+  console.log(selectedChat);
+
+
   const searchHandler = async (query) => {
     try {
       setLoading(true);
 
       const { data } = await axios.get(
-        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/all-users?search=${query}`,
+        `${BACKEND_BASE_URL}/api/user/all-users?search=${query}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -46,7 +54,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
     if (!groupChatName) return;
     try {
       const { data } = axios.put(
-        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/rename",
+        `${BACKEND_BASE_URL}/api/chats/group/rename`,
         { chatId: selectedChat._id, chatName: groupChatName },
         {
           headers: [
@@ -79,7 +87,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
       setLoading(true);
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.put(
-        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/add_user`,
+        `${BACKEND_BASE_URL}/api/chats/group/add_user`,
         {
           chatId: selectedChat._id,
           userId: user1._id,
@@ -112,16 +120,16 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
       setLoading(true);
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.put(
-        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group/remove_user`,
+        `${BACKEND_BASE_URL}/api/chats/group/remove_user`,
         {
           chatId: selectedChat._id,
           userId: user1._id,
         },
         {
-          headers: [
-            { "Content-Type": "application/json" },
-            { Authorization: `Bearer ${token}` },
-          ],
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -158,7 +166,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
       >
         <div style={{ display: "flex", gap: "5px" }}>
           <input
-            value={groupChatName}
+            value={selectedChat.chatName}
             onChange={(e) => setGroupChatName(e.target.value)}
             type="text"
             placeholder="Enter group name"
@@ -173,16 +181,7 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
             Rename
           </Button>
         </div>
-        <input
-          onChange={(e) => searchHandler(e.target.value)}
-          type="text"
-          placeholder="Add users e.g sami"
-          style={{
-            padding: "8px 10px",
-            borderRadius: "5px",
-            border: "1px solid gray",
-          }}
-        />
+
 
         {/* added users */}
         <div>
@@ -209,6 +208,17 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
             ))}
         </div>
 
+        <input
+          onChange={(e) => searchHandler(e.target.value)}
+          type="text"
+          placeholder="Add users e.g sami"
+          style={{
+            padding: "8px 10px",
+            borderRadius: "5px",
+            border: "1px solid gray",
+          }}
+        />
+
         {/* search results */}
         <div>
           {searchResult &&
@@ -231,8 +241,8 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
                   />
                 </span>
                 <div>
-                  <p>{result.name}</p>
-                  <p>Email: {result.email}</p>
+                  <p style={{ color: "black" }}>{result.name}</p>
+                  <p style={{ color: "black" }}>Email: {result.email}</p>
                 </div>
               </div>
             ))}

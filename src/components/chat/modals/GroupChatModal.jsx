@@ -1,108 +1,155 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { ChatState } from "../../../context/ChatProvider";
 import DeleteIcon from "@mui/icons-material/Delete";
-import Modal from "react-bootstrap/Modal";
-import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
+import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import Dialog from "@mui/material/Dialog";
 import Stack from "@mui/material/Stack";
+import Skeleton from "@mui/material/Skeleton";
+import CircularProgress from "@mui/material/CircularProgress";
+
+const BACKEND_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_BACKEND_BASE_URL
+    : import.meta.env.VITE_PROD_BACKEND_BASE_URL;
 
 const GroupChatModal = ({ modalShow }) => {
   const [groupChatName, setGroupChatName] = useState("");
+  const [groupPic, setGroupPic] = useState(null);
+  const [groupPicPreview, setGroupPicPreview] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [search, setSearch] = useState("");
-  const [searchResult, setSearchResult] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [groupCreating, setGroupCreating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { chats, setChats, setGroupModalShow } = ChatState();
+  const { chats, setChats } = ChatState();
   const { token } = JSON.parse(localStorage.getItem("userInfo"));
 
-  const searchHandler = async (query) => {
+  // Fetch all users
+  const fetchAllUsers = async () => {
     try {
       setLoading(true);
-
       const { data } = await axios.get(
-        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/user/all-users?search=${query}`,
+        `${BACKEND_BASE_URL}/api/user/all-users`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      setSearchResult(data);
-      setLoading(false);
-      console.log(searchResult);
+      setAllUsers(data);
+      setFilteredUsers(data);
     } catch (error) {
-      toast.error(error.response?.data);
-      console.log(error);
+      toast.error(error.response?.data || "Error fetching users");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  // Search users
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (!query.trim()) {
+      setFilteredUsers(allUsers);
+      return;
+    }
+    const filtered = allUsers.filter((user) =>
+      user.name.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  };
+
+  // Group picture input
+  const handleGroupPicChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    setGroupPic(file);
+    setGroupPicPreview(URL.createObjectURL(file));
   };
 
   const addUserToGroup = (user) => {
-    if (selectedUsers.includes(user)) {
+    if (selectedUsers.find((u) => u._id === user._id)) {
       toast.error("This user is already added");
       return;
     }
-
     setSelectedUsers([...selectedUsers, user]);
-    toast.success("New user added to group");
+    toast.success(`${user.name} added`);
   };
 
   const removeUserFromGroup = (user) => {
-    selectedUsers.filter((selected) => {
-      return selected._id !== user._id;
-    });
-    toast.success("User removed from group");
+    setSelectedUsers(selectedUsers.filter((u) => u._id !== user._id));
+    toast.info(`${user.name} removed`);
   };
 
+  // ✅ Create group (send file to backend)
   const createGroup = async () => {
-    if (!groupChatName || !searchResult) {
-      toast.error("Please fill all the fields");
+    if (!groupChatName.trim() || selectedUsers.length === 0) {
+      toast.error("Please enter group name and add users");
+      return;
+    }
+
+    if (!groupPic) {
+      toast.error("Please select a group picture");
       return;
     }
 
     try {
-      setLoading(true);
+      setGroupCreating(true);
+
+      const formData = new FormData();
+      formData.append("name", groupChatName);
+      formData.append("users", JSON.stringify(selectedUsers.map((u) => u._id)));
+      formData.append("groupPic", groupPic);
 
       const { data } = await axios.post(
-        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/chats/group",
+        `${BACKEND_BASE_URL}/api/chats/group`,
+        formData,
         {
-          name: groupChatName,
-          users: JSON.stringify(selectedUsers.map((user) => user._id)),
-        },
-        {
-          headers: [
-            { "Content-Type": "application/json" },
-            { Authorization: `Bearer ${token}` },
-          ],
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
-      setChats(data, ...chats);
-
       console.log(data);
-      setLoading(false);
-      setGroupModalShow(false);
-      toast.success("New Group created");
+      setChats([data, ...chats]);
+      toast.success("New group created successfully!");
+      setGroupCreating(false);
+      modalShow.setModalShow(false);
     } catch (error) {
-      toast.error(error.response?.data);
       console.log(error);
+      toast.error(error.response?.data || "Error creating group");
+      setGroupCreating(false);
     }
   };
 
   return (
     <Stack
-      sx={{ width: "400px", "@media (max-width:570px)": { width: "85vw" } }}
+      sx={{
+        width: "400px",
+        position: "relative",
+        "@media (max-width:570px)": { width: "85vw" },
+        maxHeight: "85vh",
+      }}
     >
-      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+      <DialogTitle sx={{ m: 0, p: 2, textAlign: "center", fontWeight: 600 }}>
         Create Group Chat
       </DialogTitle>
+
       <IconButton
         aria-label="close"
         onClick={() => modalShow.setModalShow(false)}
@@ -116,48 +163,74 @@ const GroupChatModal = ({ modalShow }) => {
         <CloseIcon />
       </IconButton>
 
-      <DialogContent
-        style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-        dividers
+      {/* Inputs */}
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          backgroundColor: "white",
+          zIndex: 2,
+          padding: "10px 16px",
+          borderBottom: "1px solid #ddd",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.8rem",
+        }}
       >
         <input
           value={groupChatName}
-          style={{
-            padding: "8px 10px",
-            borderRadius: "5px",
-            border: "1px solid gray",
-          }}
           onChange={(e) => setGroupChatName(e.target.value)}
           type="text"
           placeholder="Enter group name"
-        />
-
-        <input
           style={{
             padding: "8px 10px",
             borderRadius: "5px",
             border: "1px solid gray",
           }}
-          onChange={(e) => searchHandler(e.target.value)}
-          type="text"
-          placeholder="Add users e.g sami"
         />
 
-        {/* added users */}
+        {/* Group Picture */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleGroupPicChange}
+            style={{
+              border: "1px solid gray",
+              padding: "6px",
+              borderRadius: "5px",
+              flex: 1,
+            }}
+          />
+          <img
+            src={
+              groupPicPreview
+            }
+            alt="group"
+            style={{
+              width: "45px",
+              height: "45px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "2px solid #367134",
+            }}
+          />
+        </div>
+
+        {/* Selected Users */}
         <div>
-          <h5 style={{ marginBottom: "10px" }}>Added Users</h5>
-          {selectedUsers && selectedUsers.length > 0 ? (
+          <h5 style={{ marginBottom: "6px" }}>Added Users</h5>
+          {selectedUsers.length > 0 ? (
             selectedUsers.map((user) => (
               <Button
-                style={{ marginRight: "10px", marginBottom: "5px" }}
+                key={user._id}
+                style={{ marginRight: "8px", marginBottom: "5px" }}
                 variant="contained"
                 color="secondary"
                 size="small"
                 endIcon={
                   <DeleteIcon
-                    style={{
-                      marginLeft: "5px",
-                    }}
+                    style={{ marginLeft: "5px" }}
                     onClick={() => removeUserFromGroup(user)}
                   />
                 }
@@ -166,53 +239,123 @@ const GroupChatModal = ({ modalShow }) => {
               </Button>
             ))
           ) : (
-            <p>No user added</p>
+            <p style={{ fontSize: "14px", color: "#555" }}>No user added</p>
           )}
         </div>
 
-        {/* search results */}
-        <div>
-          {searchResult &&
-            searchResult.map((result) => (
-              <div
-                onClick={() => addUserToGroup(result)}
-                id="user-list"
-                key={result._id}
-              >
-                <span>
-                  <img
-                    style={{
-                      border: "2px solid #367134",
-                      borderRadius: "50%",
-                      marginRight: "10px",
-                    }}
-                    src={result.pic}
-                    height={30}
-                    width={30}
-                  />
-                </span>
-                <div>
-                  <p>{result.name}</p>
-                  <p>Email: {result.email}</p>
-                </div>
-              </div>
-            ))}
-        </div>
+        {/* Search Input */}
+        <input
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          type="text"
+          placeholder="Search users..."
+          style={{
+            padding: "8px 10px",
+            borderRadius: "5px",
+            border: "1px solid gray",
+          }}
+        />
+      </div>
 
-        <Button size="small" variant="contained" onClick={createGroup}>
-          Create Group
-        </Button>
+      {/* Users List */}
+      <DialogContent
+        dividers
+        style={{
+          overflowY: "auto",
+          maxHeight: "45vh",
+          marginTop: "5px",
+        }}
+      >
+        <h5 style={{ marginBottom: "10px", color: "black" }}>
+          All Users of Talk-A-Tive
+        </h5>
+
+        {loading ? (
+          <>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                width="100%"
+                height={45}
+                sx={{ borderRadius: "5px", marginBottom: "8px" }}
+              />
+            ))}
+          </>
+        ) : filteredUsers.length === 0 ? (
+          <p style={{ color: "#555" }}>No users found</p>
+        ) : (
+          filteredUsers.map((result) => (
+            <div
+              key={result._id}
+              onClick={() => addUserToGroup(result)}
+              id="user-list"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "6px",
+                border: "1px solid #ccc",
+                borderRadius: "6px",
+                marginBottom: "6px",
+                cursor: "pointer",
+                transition: "0.2s",
+              }}
+            >
+              <img
+                style={{
+                  border: "2px solid #367134",
+                  borderRadius: "50%",
+                  width: "35px",
+                  height: "35px",
+                  objectFit: "cover",
+                }}
+                src={result.pic}
+                alt={result.name}
+              />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <p style={{ margin: 0, fontWeight: 600, color: "black" }}>
+                  {result.name}
+                </p>
+                <p style={{ margin: 0, fontSize: "12px", color: "#555" }}>
+                  {result.email}
+                </p>
+              </div>
+            </div>
+          ))
+        )}
       </DialogContent>
 
-      <DialogActions>
+      {/* Footer */}
+      <DialogActions
+        style={{
+          position: "sticky",
+          bottom: 0,
+          backgroundColor: "white",
+          borderTop: "1px solid #ddd",
+          padding: "10px",
+          justifyContent: "space-between",
+        }}
+      >
         <Button
           variant="contained"
           color="secondary"
           size="small"
-          autoFocus
           onClick={() => modalShow.setModalShow(false)}
         >
           Close
+        </Button>
+        <Button
+          size="small"
+          variant="contained"
+          onClick={createGroup}
+          disabled={groupCreating}
+        >
+          {groupCreating ? (
+            <CircularProgress size={20} sx={{ color: "#fff" }} />
+          ) : (
+            "Create Group"
+          )}
         </Button>
       </DialogActions>
     </Stack>

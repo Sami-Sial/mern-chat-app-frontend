@@ -19,7 +19,9 @@ const Chat = () => {
     incomingVideoCall,
   } = ChatState();
 
-  console.log(selectedChat);
+  useEffect(() => {
+    console.log("VoiceCall updated:", voiceCall);
+  }, [voiceCall]);
 
   return (
     <>
@@ -30,8 +32,12 @@ const Chat = () => {
       {voiceCall && (
         <div
           style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
             width: "100vw",
             height: "100vh",
+            zIndex: 9999,
           }}
         >
           <VoiceCall />
@@ -41,8 +47,12 @@ const Chat = () => {
       {videoCall && (
         <div
           style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
             width: "100vw",
             height: "100vh",
+            zIndex: 9999,
           }}
         >
           <VideoCall />

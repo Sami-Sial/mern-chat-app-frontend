@@ -6,9 +6,45 @@
 }
 
 body {
-   overflow: hidden;
+    overflow: hidden;
 }
 
 p {
     color: white;
+}
+
+
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px #25D36655;
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 35px #25D366aa;
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px #25D36655;
+    }
+}
+
+@keyframes ring {
+    0% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.6;
+    }
+
+    70% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0;
+    }
 }

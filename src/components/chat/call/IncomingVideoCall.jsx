@@ -7,13 +7,18 @@ import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import logo from "../../../assets/logo.png";
 
+const BACKEND_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_BACKEND_BASE_URL
+    : import.meta.env.VITE_PROD_BACKEND_BASE_URL;
+
 import io from "socket.io-client";
-const ENDPOINT = "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app";
+const ENDPOINT = BACKEND_BASE_URL;
 let socket;
 import { ChatState } from "../../../context/ChatProvider";
 import { useState, useEffect } from "react";
 
-const IncomingVoiceCall = () => {
+const IncomingVideoCall = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const { user, incomingVideoCall, setVideoCall, setIncomingVideoCall } =
     ChatState();
@@ -93,4 +98,4 @@ const IncomingVoiceCall = () => {
   );
 };
 
-export default IncomingVoiceCall;
+export default IncomingVideoCall;

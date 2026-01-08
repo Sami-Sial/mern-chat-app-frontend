@@ -1,15 +1,14 @@
 import React from "react";
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  <>
     <App />
     <ToastContainer
-      position="top-center"
+      position="top-right"
       autoClose={5000}
       hideProgressBar={false}
       newestOnTop={false}
@@ -19,7 +18,7 @@ createRoot(document.getElementById("root")).render(
       draggable
       pauseOnHover
       theme="colored"
-      // transition={Bounce}
+    // transition={Bounce}
     />
-  </React.StrictMode>
+  </>
 );

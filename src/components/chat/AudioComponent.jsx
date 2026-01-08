@@ -5,7 +5,13 @@ import SendIcon from "@mui/icons-material/Send";
 import { ChatState } from "../../context/ChatProvider";
 import { toast } from "react-toastify";
 import axios from "axios";
-import Box from "@mui/material/Stack";
+import { useState, useEffect } from "react";
+import { CircularProgress } from "@mui/material";
+
+const BACKEND_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_BACKEND_BASE_URL
+    : import.meta.env.VITE_PROD_BACKEND_BASE_URL;
 
 const Audio = ({
   setShowVoiceComponent,
@@ -16,10 +22,29 @@ const Audio = ({
   selcetedFile,
 }) => {
   const { selectedChat } = ChatState();
+  const [isSendingVoice, setIsSendingVoice] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [stopped, setStopped] = useState(false); // track if recording stopped
+
   const { status, startRecording, stopRecording, mediaBlobUrl } =
-    useReactMediaRecorder({
-      audio: true,
-    });
+    useReactMediaRecorder({ audio: true });
+
+  // Auto start recording on first render
+  useEffect(() => {
+    startRecording();
+  }, []);
+
+  // Timer for recording
+  useEffect(() => {
+    let timer;
+    if (status === "recording") {
+      timer = setInterval(() => setRecordingTime((prev) => prev + 1), 1000);
+      setStopped(false);
+    } else if (status === "stopped") {
+      setStopped(true);
+    }
+    return () => clearInterval(timer);
+  }, [status]);
 
   const handleDelete = () => {
     stopRecording();
@@ -27,18 +52,18 @@ const Audio = ({
   };
 
   const sendVoice = async () => {
+    setIsSendingVoice(true);
     let blobFile = await fetch(mediaBlobUrl).then((r) => r.blob());
     const audio = new File([blobFile], "selectedFile", { type: blobFile.type });
 
-    console.log(audio);
-    console.log(selectedChat._id);
     setSelectedFile(audio);
-
     if (mediaBlobUrl) {
       try {
         const { token } = JSON.parse(localStorage.getItem("userInfo"));
+        console.log(selcetedFile);
+
         const { data } = await axios.post(
-          "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message",
+          `${BACKEND_BASE_URL}/api/message`,
           { selcetedFile, chatId: selectedChat._id },
           {
             headers: {
@@ -48,44 +73,52 @@ const Audio = ({
           }
         );
 
-        console.log(data);
-
         socket.emit("new message", data);
-
         setMessages([...messages, data]);
       } catch (error) {
-        // toast.error(error.response.data);
+        toast.error("Failed to send audio");
         console.log(error);
+      } finally {
+        setIsSendingVoice(false);
       }
     }
+  };
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
   };
 
   return (
     <div
       style={{
         display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
         padding: "5px",
         gap: "10px",
         overflowX: "auto",
         scrollbarWidth: "thin",
         scrollbarColor: "black",
+        borderRadius: "10px",
       }}
     >
       <Button
         style={{
-          backgroundColor: "#111b21",
-          color: "green",
+          backgroundColor: status === "recording" ? "#25D366" : "#1a1f25",
+          color: "white",
         }}
         variant="contained"
         size="small"
         onClick={startRecording}
       >
-        Start
+        {status === "recording" ? "Recording..." : "Start"}
       </Button>
 
       <Button
         style={{
-          backgroundColor: "#111b21",
+          backgroundColor: "#1a1f25",
           color: "red",
         }}
         variant="contained"
@@ -95,29 +128,63 @@ const Audio = ({
         Stop
       </Button>
 
-      <div style={{ display: "inline-block", margin: "0 10px" }}>
-        <audio
+      {/* Show recording indicator only while recording */}
+      {status === "recording" && (
+        <div
           style={{
-            height: "30px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            color: "#25D366",
+            fontWeight: "500",
+            fontSize: "14px",
           }}
-          src={mediaBlobUrl}
-          controls
-          autoPlay
-          loop
-        />
-      </div>
+        >
+          <div
+            style={{
+              width: "10px",
+              height: "10px",
+              borderRadius: "50%",
+              backgroundColor: "red",
+              animation: "pulse 1s infinite",
+            }}
+          />
+          <span>{formatTime(recordingTime)}</span>
+        </div>
+      )}
+
+      {/* Show audio only after recording stopped */}
+      {stopped && mediaBlobUrl && (
+        <audio style={{ height: "30px", marginLeft: "10px" }} src={mediaBlobUrl} controls />
+      )}
 
       <DeleteIcon
         style={{
           color: "white",
           cursor: "pointer",
         }}
-        onClick={() => handleDelete()}
+        onClick={handleDelete}
       />
-      <SendIcon
-        onClick={sendVoice}
-        style={{ color: "white", cursor: "pointer" }}
-      />
+
+      {isSendingVoice ? (
+        <CircularProgress size={20} color="secondary" />
+      ) : (
+        <SendIcon
+          onClick={sendVoice}
+          style={{ color: "white", cursor: "pointer" }}
+        />
+      )}
+
+      {/* Pulse animation */}
+      <style>
+        {`
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+        `}
+      </style>
     </div>
   );
 };

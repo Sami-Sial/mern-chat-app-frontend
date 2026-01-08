@@ -20,3 +20,28 @@ form button {
   border: none;
   cursor: pointer;
 }
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 35px;
+}
+
+.password-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #555;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+.password-icon:hover {
+  color: #000;
+}
+

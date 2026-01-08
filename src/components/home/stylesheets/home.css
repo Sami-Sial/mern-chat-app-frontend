@@ -61,7 +61,9 @@
 .active-tab-content {
   display: block;
 }
+
 @media screen and (max-width: 430px) {
+
   #title,
   #form-container {
     width: 95%;

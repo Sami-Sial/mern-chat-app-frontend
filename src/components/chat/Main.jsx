@@ -27,10 +27,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import TextField from "@mui/material/TextField";
-import { Box, Stack } from "@mui/material";
+import { Box, CircularProgress, Stack } from "@mui/material";
+
+const BACKEND_BASE_URL =
+  import.meta.env.MODE === "development"
+    ? import.meta.env.VITE_DEV_BACKEND_BASE_URL
+    : import.meta.env.VITE_PROD_BACKEND_BASE_URL;
 
 import io from "socket.io-client";
-const ENDPOINT = "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app";
+const ENDPOINT = BACKEND_BASE_URL;
 let socket, selectedChatCompare;
 
 const Main = () => {
@@ -47,6 +52,7 @@ const Main = () => {
   const [showUpdateGroupModal, setShowUpdateGroupModal] = useState(false);
   const [selcetedFile, setSelectedFile] = useState(null);
   const [onLineUsers, setOnLineUSers] = useState({});
+  const [isSendingMessage, setIsMessageSending] = useState(false);
   const {
     notification,
     setNotification,
@@ -58,7 +64,8 @@ const Main = () => {
     setIncomingVoiceCall,
     setIncomingVideoCall,
   } = ChatState();
-  const { token } = JSON.parse(localStorage.getItem("userInfo"));
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const token = userInfo?.token;
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const handleEmojiPopover = (event) => {
@@ -147,7 +154,7 @@ const Main = () => {
       setOnLineUSers(onLineusers);
     });
 
-    socket.on("incoming_voice_call", ({ from, roomId, callType }) => {
+    socket.on("incoming_voice_call", ({ from, roomId, callType, type }) => {
       setIncomingVoiceCall({
         ...from,
         roomId,
@@ -201,7 +208,7 @@ const Main = () => {
     try {
       if (!selectedChat) return;
       const { data } = await axios.get(
-        `https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message/${selectedChat._id}`,
+        `${BACKEND_BASE_URL}/api/message/${selectedChat._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -226,12 +233,21 @@ const Main = () => {
   }, [selectedChat]);
 
   const sendMessage = async () => {
+    if (
+      (!selcetedFile || selcetedFile === null) &&
+      (!newMessage || newMessage.trim() === "")
+    ) {
+      toast.info("Please enter a message or attach a file before sending!");
+      return;
+    }
+
+    setIsMessageSending(true);
     socket.emit("stop typing", selectedChat._id);
 
     try {
       let content = newMessage ? newMessage : null;
       const { data } = await axios.post(
-        "https://moderate-patricia-mern-chat-app-7096ee1a.koyeb.app/api/message",
+        `${BACKEND_BASE_URL}/api/message`,
         { content, selcetedFile, chatId: selectedChat._id },
         {
           headers: {
@@ -252,6 +268,8 @@ const Main = () => {
     } catch (error) {
       toast.error(error.response.data);
       console.log(error);
+    } finally {
+      setIsMessageSending(false);
     }
   };
 
@@ -311,12 +329,10 @@ const Main = () => {
                     onClick={() => setSelectedChat(null)}
                   />
                   <img
-                    onClick={() => setShowUpdateGroupModal(true)}
                     style={{
                       height: "40px",
                       width: "40px",
                       borderRadius: "50%",
-                      cursor: "pointer",
                     }}
                     src={getSenderImg()}
                     alt=""
@@ -357,12 +373,10 @@ const Main = () => {
                   />
 
                   <img
-                    onClick={() => setShowSenderProfileModal(true)}
                     style={{
                       height: "40px",
                       width: "40px",
                       borderRadius: "50%",
-                      cursor: "pointer",
                     }}
                     src={getSenderImg()}
                     alt=""
@@ -388,8 +402,12 @@ const Main = () => {
                     color: "white",
                   }}
                 >
-                  <CallIcon onClick={handleVideoCall} />
-                  <VideocamIcon onClick={handleVoiceCall} />
+                  <span style={{ cursor: "pointer" }}>
+                    <CallIcon onClick={handleVoiceCall} />
+                  </span>
+                  <span style={{ cursor: "pointer" }}>
+                    <VideocamIcon onClick={handleVideoCall} />
+                  </span>
 
                   <RemoveRedEyeIcon
                     style={{ cursor: "pointer" }}
@@ -451,8 +469,18 @@ const Main = () => {
                     anchorEl={anchorEl}
                     onClose={handleEmojiClose}
                     anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "left",
+                    }}
+                    transformOrigin={{
                       vertical: "bottom",
                       horizontal: "left",
+                    }}
+                    PaperProps={{
+                      style: {
+                        transform: "translateY(-25px)",
+                        zIndex: 1300,
+                      },
                     }}
                   >
                     <div>
@@ -489,8 +517,13 @@ const Main = () => {
                       padding: "2px",
                     }}
                     onClick={sendMessage}
+                    disabled={isSendingMessage}
                   >
-                    Send
+                    {isSendingMessage ? (
+                      <CircularProgress size={20} color="secondary" />
+                    ) : (
+                      "Send"
+                    )}
                   </Button>
                 </div>
                 <KeyboardVoiceIcon
@@ -568,14 +601,171 @@ const Main = () => {
           <CloseIcon />
         </IconButton>
 
-        <DialogContent dividers>
-          <img
-            src={selcetedFile && window.URL.createObjectURL(selcetedFile)}
-            style={{ borderRadius: "10px" }}
-            width={350}
-            height={250}
-            alt=""
-          />
+        <DialogContent
+          dividers
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            p: 3,
+            backgroundColor: "#fafafa",
+          }}
+        >
+          {selcetedFile && (
+            <>
+              {/*  Image */}
+              {selcetedFile.type.startsWith("image/") && (
+                <img
+                  src={URL.createObjectURL(selcetedFile)}
+                  alt={selcetedFile.name}
+                  style={{
+                    borderRadius: "14px",
+                    width: "100%",
+                    maxWidth: "800px",
+                    height: "auto",
+                    objectFit: "contain",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                  }}
+                />
+              )}
+
+              {/*  Video */}
+              {selcetedFile.type.startsWith("video/") && (
+                <video
+                  src={URL.createObjectURL(selcetedFile)}
+                  controls
+                  style={{
+                    borderRadius: "14px",
+                    width: "100%",
+                    maxWidth: "800px",
+                    maxHeight: "500px",
+                    objectFit: "contain",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                    backgroundColor: "#000",
+                  }}
+                />
+              )}
+
+              {/*  Audio */}
+              {selcetedFile.type.startsWith("audio/") && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#fff",
+                    borderRadius: "14px",
+                    padding: "24px",
+                    width: "100%",
+                    maxWidth: "700px",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                  }}
+                >
+                  <audio
+                    src={URL.createObjectURL(selcetedFile)}
+                    controls
+                    style={{
+                      width: "100%",
+                    }}
+                  />
+                  <p
+                    style={{
+                      marginTop: "12px",
+                      color: "#555",
+                      fontWeight: 500,
+                    }}
+                  >
+                    🎵 {selcetedFile.name}
+                  </p>
+                </div>
+              )}
+
+              {/*  PDF */}
+              {selcetedFile.type === "application/pdf" && (
+                <embed
+                  src={URL.createObjectURL(selcetedFile)}
+                  type="application/pdf"
+                  width="100%"
+                  height="600px"
+                  style={{
+                    borderRadius: "14px",
+                    border: "1px solid #ddd",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                    backgroundColor: "#fff",
+                  }}
+                />
+              )}
+
+              {/*  ZIP */}
+              {(selcetedFile.type === "application/zip" ||
+                selcetedFile.type === "application/x-zip-compressed") && (
+                  <div
+                    style={{
+                      padding: "30px",
+                      textAlign: "center",
+                      borderRadius: "14px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                      width: "100%",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    <strong>{selcetedFile.name}</strong>
+                    <p style={{ marginTop: "10px", color: "#555" }}>
+                      ZIP file selected — preview not available.
+                    </p>
+                  </div>
+                )}
+
+              {/*  TXT */}
+              {selcetedFile.type === "text/plain" && (
+                <iframe
+                  src={URL.createObjectURL(selcetedFile)}
+                  title={selcetedFile.name}
+                  width="100%"
+                  height="400px"
+                  style={{
+                    borderRadius: "14px",
+                    border: "1px solid #ddd",
+                    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                    backgroundColor: "#fff",
+                    maxWidth: "800px",
+                  }}
+                />
+              )}
+
+              {/*  Unsupported */}
+              {!(
+                selcetedFile.type.startsWith("image/") ||
+                selcetedFile.type.startsWith("video/") ||
+                selcetedFile.type.startsWith("audio/") ||
+                selcetedFile.type === "application/pdf" ||
+                selcetedFile.type === "application/zip" ||
+                selcetedFile.type === "application/x-zip-compressed" ||
+                selcetedFile.type === "text/plain"
+              ) && (
+                  <div
+                    style={{
+                      padding: "30px",
+                      textAlign: "center",
+                      borderRadius: "14px",
+                      backgroundColor: "#fff",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+                      width: "100%",
+                      maxWidth: "600px",
+                    }}
+                  >
+                    <strong>{selcetedFile.name}</strong>
+                    <p style={{ marginTop: "10px", color: "#555" }}>
+                      No preview available for this file type.
+                    </p>
+                  </div>
+                )}
+            </>
+          )}
         </DialogContent>
 
         <DialogActions>
@@ -584,8 +774,13 @@ const Main = () => {
             color="secondary"
             autoFocus
             onClick={sendMessage}
+            disabled={isSendingMessage}
           >
-            Send
+            {isSendingMessage ? (
+              <CircularProgress size={20} color="secondary" />
+            ) : (
+              "Send"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
