@@ -1,0 +1,47 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 7px;
+  border-radius: 5px;
+  border: 2px solid skyblue;
+  font-size: 16px;
+}
+
+form button {
+  padding: 8px;
+  background-color: black;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 35px;
+}
+
+.password-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #555;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+.password-icon:hover {
+  color: #000;
+}
+
