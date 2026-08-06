@@ -1,6 +1,6 @@
 {
   "appId": "com.talkative.app",
   "appName": "Talk-A-Tive",
-  "webDir": "../mern-chat-app-frontend/dist",
+  "webDir": "../frontend/dist",
   "bundledWebRuntime": false
 }

@@ -29,10 +29,10 @@ cd chat-site
 ### 2. Setup the Backend
 Navigate to the backend directory and install dependencies:
 ```bash
-cd mern-chat-app-backend
+cd backend
 npm install
 ```
-Create a `.env` file in the `mern-chat-app-backend` folder (see Environment Variables section below).
+Create a `.env` file in the `backend` folder (see Environment Variables section below).
 Start the backend server:
 ```bash
 npm run dev
@@ -43,7 +43,7 @@ npm start
 ### 3. Setup the Frontend
 Open a new terminal and navigate to the frontend directory:
 ```bash
-cd mern-chat-app-frontend
+cd frontend
 npm install
 ```
 Start the frontend development server:
@@ -53,7 +53,7 @@ npm run dev
 
 ## 🔐 Environment Variables
 
-You must create a `.env` file in the `mern-chat-app-backend` directory with the following keys:
+You must create a `.env` file in the `backend` directory with the following keys:
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
@@ -64,14 +64,14 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 EMAIL_USER=your_nodemailer_email
 EMAIL_PASS=your_nodemailer_password
 ```
-*(If the frontend needs specific variables, ensure you create a `.env` in `mern-chat-app-frontend` prefixed with `VITE_`)*
+*(If the frontend needs specific variables, ensure you create a `.env` in `frontend` prefixed with `VITE_`)*
 
 ## 📱 Mobile App Build (Capacitor)
 This project is configured to be compiled into native iOS and Android apps using Capacitor.
 
 1. **Build the web project first**:
    ```bash
-   cd mern-chat-app-frontend
+   cd frontend
    npm run build
    ```
 2. **Initialize Mobile Project** (First time only):
@@ -96,11 +96,11 @@ This project is configured to be compiled into native iOS and Android apps using
 ## 🔄 CI/CD & Deployment
 
 ### Frontend (Vercel)
-The frontend (`mern-chat-app-frontend`) is already deployed to Vercel. Connect your GitHub repository to Vercel and point the build settings to this folder.
+The frontend (`frontend`) is already deployed to Vercel. Connect your GitHub repository to Vercel and point the build settings to this folder.
 
 ### Backend (Fly.io)
 The backend is configured for automated deployment to Fly.io via GitHub Actions.
-1. The `fly.toml`, `Dockerfile`, and `.dockerignore` are located in `mern-chat-app-backend`.
+1. The `fly.toml`, `Dockerfile`, and `.dockerignore` are located in `backend`.
 2. Add your Fly.io API token to your GitHub Repository Secrets as `FLY_API_TOKEN`.
 3. Every push to the `main` branch will automatically deploy the backend.
 
