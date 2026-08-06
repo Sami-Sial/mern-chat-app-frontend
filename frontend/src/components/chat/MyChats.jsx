@@ -247,6 +247,10 @@ const MyChats = () => {
             <span>ZIP</span>
           </span>
         );
+      case "info":
+        return msg.content?.length > 25
+          ? msg.content?.slice(0, 25) + "..."
+          : msg.content;
       default:
         return "Unsupported File";
     }

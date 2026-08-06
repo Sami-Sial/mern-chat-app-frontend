@@ -1,6 +1,8 @@
 const chats = require("../data");
 const Chat = require("../models/chat.model");
 const User = require("../models/user.model");
+const Message = require("../models/message.model");
+const Notification = require("../models/notification.model");
 
 const accessChat = async (req, res) => {
   const { userId } = req.body;
@@ -104,9 +106,37 @@ const createGroupChat = async (req, res, next) => {
       groupPic: req.file && req.file.path,
     });
     const groupChat = await groupChatData.save();
+
+    // Create system message
+    const sysMsg = await Message.create({
+      sender: req.user._id,
+      chat: groupChat._id,
+      content: `${req.user.name} created the group.`,
+      msgType: "info",
+    });
+
+    await Chat.findByIdAndUpdate(groupChat._id, { latestMsg: sysMsg });
+
+    // Create notifications for all added users except the admin
+    const notificationsToInsert = users
+      .filter((u) => {
+        const id = u._id || u;
+        return id.toString() !== req.user._id.toString();
+      })
+      .map((u) => ({
+        user: u._id || u,
+        chat: groupChat._id,
+        message: sysMsg._id,
+      }));
+
+    if (notificationsToInsert.length > 0) {
+      await Notification.insertMany(notificationsToInsert);
+    }
+
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
       .populate("users", "-password")
-      .populate("groupAdmin", "-password");
+      .populate("groupAdmin", "-password")
+      .populate("latestMsg");
     res.status(200).json(fullGroupChat);
   } catch (error) {
     res.status(400).send(error.message);
@@ -143,7 +173,31 @@ const addToGroup = async (req, res) => {
   if (!added) {
     res.status(400).sned("Chat Not Found");
   } else {
-    res.json(added);
+    // Create system message
+    const addedUser = await User.findById(userId);
+    const sysMsg = await Message.create({
+      sender: req.user._id,
+      chat: chatId,
+      content: `${req.user.name} added ${addedUser.name}.`,
+      msgType: "info",
+    });
+
+    await Chat.findByIdAndUpdate(chatId, { latestMsg: sysMsg });
+
+    // Create notification for the newly added user
+    await Notification.create({
+      user: userId,
+      chat: chatId,
+      message: sysMsg._id,
+    });
+
+    // Populate latestMsg to send back
+    const finalChat = await Chat.findById(chatId)
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password")
+      .populate("latestMsg");
+
+    res.json(finalChat);
   }
 };
 
@@ -160,7 +214,31 @@ const removeFromGroup = async (req, res) => {
   if (!removed) {
     res.status(400).send("Chat Not Found");
   } else {
-    res.json(removed);
+    // Determine the content based on who is removing whom
+    let msgContent = "";
+    if (req.user._id.toString() === userId.toString()) {
+      msgContent = `${req.user.name} left the group.`;
+    } else {
+      const removedUser = await User.findById(userId);
+      msgContent = `${req.user.name} removed ${removedUser ? removedUser.name : "a user"}.`;
+    }
+
+    // Create system message
+    const sysMsg = await Message.create({
+      sender: req.user._id,
+      chat: chatId,
+      content: msgContent,
+      msgType: "info",
+    });
+
+    await Chat.findByIdAndUpdate(chatId, { latestMsg: sysMsg });
+
+    const finalChat = await Chat.findById(chatId)
+      .populate("users", "-password")
+      .populate("groupAdmin", "-password")
+      .populate("latestMsg");
+
+    res.json(finalChat);
   }
 };
 

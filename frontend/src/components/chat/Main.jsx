@@ -81,7 +81,7 @@ const Main = () => {
       if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl);
     };
   }, [filePreviewUrl]);
-
+  
   const {
     notification,
     setNotification,
@@ -92,6 +92,8 @@ const Main = () => {
     setVoiceCall,
     setIncomingVoiceCall,
     setIncomingVideoCall,
+    chats,
+    setChats,
   } = ChatState();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
   const token = userInfo?.token;
@@ -172,6 +174,18 @@ const Main = () => {
         if (!notification.includes(newMessageRecieved)) {
           setNotification([newMessageRecieved, ...notification]);
           fetchMessages();
+          
+          setChats((prevChats) => {
+            if (!prevChats) return prevChats;
+            const chatExists = prevChats.some(c => c._id === newMessageRecieved.chat._id);
+            if (!chatExists) {
+               return [newMessageRecieved.chat, ...prevChats];
+            } else {
+               return prevChats.map(c => 
+                 c._id === newMessageRecieved.chat._id ? { ...c, latestMsg: newMessageRecieved } : c
+               );
+            }
+          });
         }
       } else {
         setMessages((prev) => [...prev, newMessageRecieved]);

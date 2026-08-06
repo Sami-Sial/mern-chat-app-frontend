@@ -11,6 +11,7 @@ import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const BACKEND_BASE_URL =
   import.meta.env.MODE === "development"
@@ -23,9 +24,12 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [leaveLoading, setLeaveLoading] = useState(false);
 
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const { user, selectedChat, setSelectedChat, chats, setChats } = ChatState();
   const { token } = JSON.parse(localStorage.getItem("userInfo"));
+
+  if (!selectedChat) return null;
 
   console.log(selectedChat);
 
@@ -57,10 +61,10 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
         `${BACKEND_BASE_URL}/api/chats/group/rename`,
         { chatId: selectedChat._id, chatName: groupChatName },
         {
-          headers: [
-            { "Content-Type": "application/json" },
-            { Authorization: `Bearer ${token}` },
-          ],
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       console.log(data);
@@ -93,10 +97,10 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
           userId: user1._id,
         },
         {
-          headers: [
-            { "Content-Type": "application/json" },
-            { Authorization: `Bearer ${token}` },
-          ],
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -117,7 +121,10 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
     console.log(selectedChat.users.length);
 
     try {
-      setLoading(true);
+      const isLeaving = user1._id === user._id;
+      if (isLeaving) setLeaveLoading(true);
+      else setLoading(true);
+
       const { token } = JSON.parse(localStorage.getItem("userInfo"));
       const { data } = await axios.put(
         `${BACKEND_BASE_URL}/api/chats/group/remove_user`,
@@ -133,11 +140,19 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
         }
       );
 
-      user1._id === user._id ? setSelectedChat() : setSelectedChat(data);
-      setLoading(false);
+      if (isLeaving) {
+        setSelectedChat();
+        setChats(chats.filter((c) => c._id !== selectedChat._id));
+        toast.success("You have left the group successfully");
+        setLeaveLoading(false);
+      } else {
+        setSelectedChat(data);
+        setLoading(false);
+      }
     } catch (error) {
-      toast.error(error.response.data);
+      toast.error(error.response?.data || "An error occurred");
       setLoading(false);
+      setLeaveLoading(false);
     }
     setGroupChatName("");
   };
@@ -195,12 +210,14 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
                 color="secondary"
                 size="small"
                 endIcon={
-                  <DeleteIcon
-                    style={{
-                      marginLeft: "5px",
-                    }}
-                    onClick={() => handleRemove(u)}
-                  />
+                  selectedChat.groupAdmin._id === user._id && (
+                    <DeleteIcon
+                      style={{
+                        marginLeft: "5px",
+                      }}
+                      onClick={() => handleRemove(u)}
+                    />
+                  )
                 }
               >
                 {u.name}
@@ -208,45 +225,49 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
             ))}
         </div>
 
-        <input
-          onChange={(e) => searchHandler(e.target.value)}
-          type="text"
-          placeholder="Add users e.g sami"
-          style={{
-            padding: "8px 10px",
-            borderRadius: "5px",
-            border: "1px solid gray",
-          }}
-        />
+        {selectedChat.groupAdmin._id === user._id && (
+          <>
+            <input
+              onChange={(e) => searchHandler(e.target.value)}
+              type="text"
+              placeholder="Add users e.g sami"
+              style={{
+                padding: "8px 10px",
+                borderRadius: "5px",
+                border: "1px solid gray",
+              }}
+            />
 
-        {/* search results */}
-        <div>
-          {searchResult &&
-            searchResult.map((result) => (
-              <div
-                onClick={() => handleAddUser(result)}
-                id="user-list"
-                key={result._id}
-              >
-                <span>
-                  <img
-                    style={{
-                      border: "2px solid #367134",
-                      borderRadius: "50%",
-                      marginRight: "10px",
-                    }}
-                    src={result.pic}
-                    height={30}
-                    width={30}
-                  />
-                </span>
-                <div>
-                  <p style={{ color: "black" }}>{result.name}</p>
-                  <p style={{ color: "black" }}>Email: {result.email}</p>
-                </div>
-              </div>
-            ))}
-        </div>
+            {/* search results */}
+            <div>
+              {searchResult &&
+                searchResult.map((result) => (
+                  <div
+                    onClick={() => handleAddUser(result)}
+                    id="user-list"
+                    key={result._id}
+                  >
+                    <span>
+                      <img
+                        style={{
+                          border: "2px solid #367134",
+                          borderRadius: "50%",
+                          marginRight: "10px",
+                        }}
+                        src={result.pic}
+                        height={30}
+                        width={30}
+                      />
+                    </span>
+                    <div>
+                      <p style={{ color: "black" }}>{result.name}</p>
+                      <p style={{ color: "black" }}>Email: {result.email}</p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -254,9 +275,10 @@ const UpdateGroupModal = ({ setShowUpdateGroupModal }) => {
           variant="contained"
           color="error"
           size="small"
+          disabled={leaveLoading}
           onClick={() => handleRemove(user)}
         >
-          Leave Group
+          {leaveLoading ? <CircularProgress size={20} color="inherit" /> : "Leave Group"}
         </Button>
       </DialogActions>
     </div>

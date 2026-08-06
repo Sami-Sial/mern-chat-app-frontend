@@ -92,6 +92,15 @@ const ScrollableChat = ({ messages }) => {
                 </div>
               )}
 
+              {/* ℹ️ INFO / SYSTEM MESSAGE */}
+              {m.msgType === "info" ? (
+                <div style={{ display: "flex", justifyContent: "center", margin: "10px 0" }}>
+                  <span style={{ backgroundColor: "#202c33", color: "#bbb", padding: "5px 12px", borderRadius: "10px", fontSize: "12px", textAlign: "center" }}>
+                    {m.content}
+                  </span>
+                </div>
+              ) : (
+
               <Stack
                 sx={{
                   textAlign: isOwn ? "end" : "start",
@@ -321,6 +330,7 @@ const ScrollableChat = ({ messages }) => {
                   {formatTime(m.createdAt)}
                 </p>
               </Stack>
+              )}
             </React.Fragment>
           );
         })}

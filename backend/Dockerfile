@@ -12,7 +12,7 @@ RUN npm install --production
 COPY . .
 
 # Ensure the app runs on the correct port (Fly.io will route HTTP traffic to this port)
-EXPOSE 5000
+EXPOSE 8000
 
 # Start the Node.js application
 CMD [ "npm", "start" ]
