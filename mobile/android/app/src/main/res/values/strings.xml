@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Talk-A-Tive</string>
+    <string name="title_activity_main">Talk-A-Tive</string>
+    <string name="package_name">com.talkative.app</string>
+    <string name="custom_url_scheme">com.talkative.app</string>
+</resources>

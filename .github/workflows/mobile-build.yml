@@ -21,7 +21,7 @@ jobs:
       - name: Build Frontend
         working-directory: ./frontend
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           
       - name: Install Mobile Deps
@@ -30,7 +30,6 @@ jobs:
         
       - name: Cap Sync
         working-directory: ./mobile
-        # Note: Android project must be created first locally via `npx cap add android` and pushed to Git.
         run: npx cap sync android
         
       - name: Setup Java
@@ -48,3 +47,38 @@ jobs:
         with:
           name: app-debug
           path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build
+          
+      - name: Install Mobile Deps
+        working-directory: ./mobile
+        run: npm install
+        
+      - name: Cap Sync
+        working-directory: ./mobile
+        run: npx cap sync ios
+        
+      - name: Build iOS App
+        working-directory: ./mobile/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath build
+          
+      - name: Upload iOS App
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-ios
+          path: mobile/ios/App/build/Build/Products/Debug-iphonesimulator/App.app
