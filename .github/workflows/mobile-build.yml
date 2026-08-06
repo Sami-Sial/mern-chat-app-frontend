@@ -1,0 +1,50 @@
+name: Mobile Build
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mern-chat-app-frontend/**'
+      - 'mobile/**'
+      - '.github/workflows/mobile-build.yml'
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Build Frontend
+        working-directory: ./mern-chat-app-frontend
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Install Mobile Deps
+        working-directory: ./mobile
+        run: npm install
+        
+      - name: Cap Sync
+        working-directory: ./mobile
+        # Note: Android project must be created first locally via `npx cap add android` and pushed to Git.
+        run: npx cap sync android
+        
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          
+      - name: Build APK
+        working-directory: ./mobile/android
+        run: ./gradlew assembleDebug
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
