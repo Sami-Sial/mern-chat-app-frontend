@@ -8,10 +8,11 @@ const ChatsPage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!user) {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (!userInfo) {
       navigate("/auth");
     }
-  }, [navigate, user]);
+  }, [navigate]);
 
   return (
     <div style={{ height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column", width: "100%", zIndex: 0, boxSizing: "border-box", backgroundColor: "transparent" }}>

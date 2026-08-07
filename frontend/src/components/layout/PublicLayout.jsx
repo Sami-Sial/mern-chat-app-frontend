@@ -9,7 +9,8 @@ const PublicLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    if (user && userInfo) {
       navigate('/chats');
     }
   }, [user, navigate]);
