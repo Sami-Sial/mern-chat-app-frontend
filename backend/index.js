@@ -6,10 +6,16 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const cors = require("cors");
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost',
+  'capacitor://localhost'
+];
+
 // data parsing
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: allowedOrigins,
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -57,7 +63,7 @@ const server = app.listen(port, () => {
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: process.env.FRONTEND_URL,
+    origin: allowedOrigins,
   },
 });
 
