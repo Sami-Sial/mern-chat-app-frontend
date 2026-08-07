@@ -2,5 +2,10 @@
   "appId": "com.talkative.app",
   "appName": "Talk-A-Tive",
   "webDir": "../frontend/dist",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }

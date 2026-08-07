@@ -40,7 +40,7 @@ const ProfileModal = ({ setProfileModalShow }) => {
       localStorage.removeItem("userInfo");
       setUser(null);
       toast.success("Logout successfully");
-      navigate("/");
+      navigate("/auth");
     }, 2000);
   };
 

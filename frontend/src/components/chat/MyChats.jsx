@@ -173,7 +173,7 @@ const MyChats = () => {
       localStorage.removeItem("userInfo");
       setUser(null);
       toast.success("Logout seucessfully");
-      navigate("/");
+      navigate("/auth");
     }, 2000);
   };
 

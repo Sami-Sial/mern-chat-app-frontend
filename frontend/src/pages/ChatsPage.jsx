@@ -9,9 +9,9 @@ const ChatsPage = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/");
+      navigate("/auth");
     }
-  }, [navigate]);
+  }, [navigate, user]);
 
   return (
     <div style={{ height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column", width: "100%", zIndex: 0, boxSizing: "border-box", backgroundColor: "transparent" }}>
