@@ -323,9 +323,19 @@ const Main = () => {
 
     try {
       let content = newMessage ? newMessage : null;
+
+      const formData = new FormData();
+      formData.append("chatId", selectedChat._id);
+      if (content) {
+        formData.append("content", content);
+      }
+      if (selcetedFile) {
+        formData.append("selcetedFile", selcetedFile);
+      }
+
       const { data } = await axios.post(
         `${BACKEND_BASE_URL}/api/message`,
-        { content, selcetedFile, chatId: selectedChat._id },
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",

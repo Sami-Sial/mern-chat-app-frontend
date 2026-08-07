@@ -61,9 +61,13 @@ const Audio = ({
         const { token } = JSON.parse(localStorage.getItem("userInfo"));
         console.log(selcetedFile);
 
+        const formData = new FormData();
+        formData.append("chatId", selectedChat._id);
+        formData.append("selcetedFile", audio);
+
         const { data } = await axios.post(
           `${BACKEND_BASE_URL}/api/message`,
-          { selcetedFile, chatId: selectedChat._id },
+          formData,
           {
             headers: {
               "Content-Type": "multipart/form-data",
